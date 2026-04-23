@@ -2,190 +2,107 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Corretor Provas - Escola Jales Machado</title>
+    <title>Corretor Jales Machado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .grid-questoes {
+        .grid-respostas {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 12px;
-            max-height: 60vh;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 10px;
+            max-height: 400px;
             overflow-y: auto;
-            padding: 10px;
             background: #1e293b;
+            padding: 15px;
             border-radius: 8px;
         }
-        .questao-card {
+        .item-questao {
             background: #334155;
-            padding: 8px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .input-alternativa {
-            width: 35px;
-            text-align: center;
-            background: #0f172a;
-            color: #38bdf8;
-            border: 1px solid #475569;
+            padding: 5px 10px;
             border-radius: 4px;
-            font-weight: bold;
-            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        input { color: black; font-weight: bold; text-align: center; width: 30px; border-radius: 3px; }
     </style>
 </head>
-<body class="bg-slate-900 text-white min-h-screen p-4 md:p-8">
+<body class="bg-slate-900 text-white p-6">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6 text-sky-400 text-center">📊 Corretor de Provas</h1>
 
-    <div class="max-w-4xl mx-auto">
-        <header class="mb-8 text-center">
-            <h1 class="text-3xl font-bold text-sky-400">📋 Corretor de Provas IA</h1>
-            <p class="text-slate-400">Escola Estadual Deputado Jales Machado</p>
-        </header>
-
-        <div id="passo1" class="bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700">
-            <h2 class="text-xl font-semibold mb-4 flex items-center">
-                <span class="bg-sky-500 text-white w-8 h-8 rounded-full flex items-center justify-center mr-2">1</span>
-                Configurar Gabarito Oficial
-            </h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm text-slate-400 mb-1">Total de Questões na Folha</label>
-                    <input type="number" id="num_questoes" value="50" class="w-full bg-slate-900 border border-slate-700 p-2 rounded">
-                </div>
-                <div>
-                    <label class="block text-sm text-slate-400 mb-1">Foto do Gabarito Preenchido</label>
-                    <input type="file" id="img_gabarito" accept="image/*" class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-500 file:text-white hover:file:bg-sky-600">
-                </div>
-                <button onclick="extrairGabarito()" id="btn_extrair" class="w-full bg-sky-600 hover:bg-sky-500 py-3 rounded-lg font-bold transition">
-                    Processar Gabarito com OpenCV
-                </button>
-            </div>
+        <div id="etapa1" class="bg-slate-800 p-6 rounded-lg mb-6">
+            <h2 class="mb-4 font-semibold text-lg">1. Escanear Gabarito Oficial</h2>
+            <input type="file" id="foto_gabarito" class="mb-4 block w-full text-sm">
+            <button onclick="processarGabarito()" id="btn1" class="w-full bg-sky-600 p-3 rounded font-bold">Processar com OpenCV</button>
         </div>
 
-        <div id="passo2" class="hidden bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700 mt-6">
-            <h2 class="text-xl font-semibold mb-2">🔍 Revisão do Gabarito</h2>
-            <p class="text-sm text-slate-400 mb-4">Confira se o OpenCV leu corretamente. Clique na letra para editar.</p>
-            
-            <div id="grade_revisao" class="grid-questoes mb-6">
-                </div>
-
-            <div class="flex gap-4">
-                <button onclick="location.reload()" class="flex-1 bg-slate-700 hover:bg-slate-600 py-2 rounded-lg font-bold">Voltar</button>
-                <button onclick="proximoParaAlunos()" class="flex-1 bg-green-600 hover:bg-green-500 py-2 rounded-lg font-bold">Tudo Certo, Próximo</button>
-            </div>
+        <div id="etapa_revisao" class="hidden bg-slate-800 p-6 rounded-lg mb-6">
+            <h2 class="mb-2 font-semibold">2. Revise as Respostas</h2>
+            <p class="text-xs text-slate-400 mb-4">O OpenCV detectou estas letras. Ajuste se necessário:</p>
+            <div id="grade" class="grid-respostas mb-4"></div>
+            <button onclick="confirmarGabarito()" class="w-full bg-green-600 p-3 rounded font-bold">Gabarito está Correto</button>
         </div>
 
-        <div id="passo3" class="hidden bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700 mt-6">
-            <h2 class="text-xl font-semibold mb-4 flex items-center">
-                <span class="bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center mr-2">2</span>
-                Corrigir Prova do Aluno
-            </h2>
-            <div class="space-y-4">
-                <input type="text" id="nome_aluno" placeholder="Nome do Aluno" class="w-full bg-slate-900 border border-slate-700 p-2 rounded">
-                <input type="file" id="img_aluno" accept="image/*" class="w-full text-sm text-slate-400 file:bg-green-600 file:text-white file:rounded-full file:px-4 file:py-2 file:border-0">
-                <button onclick="corrigirProva()" id="btn_corrigir" class="w-full bg-green-600 hover:bg-green-500 py-3 rounded-lg font-bold transition">
-                    Corrigir e Gerar Nota
-                </button>
-            </div>
-            <div id="resultado" class="mt-6 p-4 bg-slate-900 rounded-lg hidden"></div>
+        <div id="etapa2" class="hidden bg-slate-800 p-6 rounded-lg">
+            <h2 class="mb-4 font-semibold text-lg">3. Corrigir Prova do Aluno</h2>
+            <input type="text" id="nome_aluno" placeholder="Nome do Aluno" class="w-full p-2 mb-4 rounded text-black">
+            <input type="file" id="foto_aluno" class="mb-4 block w-full text-sm">
+            <button onclick="corrigirAluno()" id="btn2" class="w-full bg-green-600 p-3 rounded font-bold">Calcular Nota</button>
+            <div id="resultado" class="mt-6 text-center text-2xl font-bold text-yellow-400"></div>
         </div>
     </div>
 
     <script>
-        let gabaritoFinal = {};
+        let gabaritoMemoria = {};
 
-        async function extrairGabarito() {
-            const btn = document.getElementById('btn_extrair');
-            const img = document.getElementById('img_gabarito').files[0];
-            const num = document.getElementById('num_questoes').value;
+        async function processarGabarito() {
+            const file = document.getElementById('foto_gabarito').files[0];
+            if(!file) return alert("Selecione a foto!");
 
-            if(!img) return alert("Selecione a foto do gabarito!");
+            document.getElementById('btn1').innerText = "Analisando Blocos...";
+            const fd = new FormData();
+            fd.append('imagem', file);
+            fd.append('num_questoes', 50);
+
+            const res = await fetch('/api/extrair-gabarito', { method: 'POST', body: fd });
+            const data = await res.json();
             
-            btn.innerText = "Processando Blocos...";
-            btn.disabled = true;
-
-            const formData = new FormData();
-            formData.append('imagem', img);
-            formData.append('num_questoes', num);
-
-            try {
-                const res = await fetch('/api/extrair-gabarito', { method: 'POST', body: formData });
-                const data = await res.json();
-                
-                if(data.erro) throw new Error(data.erro);
-
-                gabaritoFinal = data.gabarito;
-                renderizarRevisao();
-                document.getElementById('passo1').classList.add('hidden');
-                document.getElementById('passo2').classList.remove('hidden');
-            } catch (e) {
-                alert("Erro: " + e.message);
-            } finally {
-                btn.innerText = "Processar Gabarito com OpenCV";
-                btn.disabled = false;
-            }
-        }
-
-        function renderizarRevisao() {
-            const grid = document.getElementById('grade_revisao');
-            grid.innerHTML = '';
+            gabaritoMemoria = data.gabarito;
+            const grade = document.getElementById('grade');
+            grade.innerHTML = '';
             
-            Object.keys(gabaritoFinal).forEach(num => {
-                grid.innerHTML += `
-                    <div class="questao-card">
-                        <span class="text-xs text-slate-400 font-bold">Q${num}</span>
-                        <input type="text" maxlength="1" value="${gabaritoFinal[num]}" 
-                            class="input-alternativa" oninput="atualizarGabarito('${num}', this.value)">
-                    </div>
-                `;
+            Object.keys(gabaritoMemoria).forEach(q => {
+                grade.innerHTML += `
+                    <div class="item-questao">
+                        <span class="text-xs">Q${q}</span>
+                        <input type="text" value="${gabaritoMemoria[q]}" onchange="gabaritoMemoria['${q}']=this.value.toUpperCase()">
+                    </div>`;
             });
+            document.getElementById('etapa_revisao').classList.remove('hidden');
         }
 
-        function atualizarGabarito(num, valor) {
-            gabaritoFinal[num] = valor.toUpperCase();
+        function confirmarGabarito() {
+            document.getElementById('etapa1').classList.add('hidden');
+            document.getElementById('etapa_revisao').classList.add('hidden');
+            document.getElementById('etapa2').classList.remove('hidden');
         }
 
-        function proximoParaAlunos() {
-            document.getElementById('passo2').classList.add('hidden');
-            document.getElementById('passo3').classList.remove('hidden');
-        }
-
-        async function corrigirProva() {
-            const btn = document.getElementById('btn_corrigir');
-            const img = document.getElementById('img_aluno').files[0];
+        async function corrigirAluno() {
+            const file = document.getElementById('foto_aluno').files[0];
             const nome = document.getElementById('nome_aluno').value;
+            if(!file || !nome) return alert("Preencha tudo!");
 
-            if(!img || !nome) return alert("Preencha o nome e a foto da prova!");
+            document.getElementById('btn2').innerText = "Corrigindo...";
+            const fd = new FormData();
+            fd.append('imagem', file);
+            fd.append('nome_aluno', nome);
+            fd.append('gabarito', JSON.stringify(gabaritoMemoria));
 
-            btn.innerText = "Calculando Nota...";
-            btn.disabled = true;
-
-            const formData = new FormData();
-            formData.append('imagem', img);
-            formData.append('nome_aluno', nome);
-            formData.append('gabarito', JSON.stringify(gabaritoFinal));
-
-            try {
-                const res = await fetch('/api/corrigir', { method: 'POST', body: formData });
-                const data = await res.json();
-                
-                const resDiv = document.getElementById('resultado');
-                resDiv.classList.remove('hidden');
-                resDiv.innerHTML = `
-                    <div class="text-center">
-                        <h3 class="text-2xl font-bold text-sky-400">${data.nome_aluno}</h3>
-                        <div class="text-4xl font-black my-2">${data.nota}</div>
-                        <p class="text-slate-400">Acertos: ${data.acertos} de ${data.total}</p>
-                    </div>
-                `;
-            } catch (e) {
-                alert("Erro na correção: " + e.message);
-            } finally {
-                btn.innerText = "Corrigir e Gerar Nota";
-                btn.disabled = false;
-            }
+            const res = await fetch('/api/corrigir', { method: 'POST', body: fd });
+            const data = await res.json();
+            
+            document.getElementById('resultado').innerHTML = `Aluno: ${data.nome_aluno}<br>Nota: ${data.nota}`;
+            document.getElementById('btn2').innerText = "Calcular Nota";
         }
     </script>
 </body>
