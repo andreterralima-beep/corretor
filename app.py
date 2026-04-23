@@ -1,18 +1,10 @@
-import os
-import cv2
-import numpy as np
-import json
-from flask import Flask, request, jsonify, render_template
-
-app = Flask(__name__)
-
-def detectar_por_materias(image_file):
-    # Ordem exata das matérias no seu papel (3 colunas)
-    nomes_materias = [
-        "Língua Portuguesa", "Matemática", "Biologia",
-        "Química", "Física", "História",
-        "Geografia", "Língua Inglesa", "Educação Física",
-        "Arte", "Sociologia", "Filosofia"
+def detectar_por_materias_preciso(image_file):
+    # ESTRUTURA EXATA DO SEU MODELO (Nome da Matéria : Quantidade de Questões)
+    estrutura_prova = [
+        ("Língua Portuguesa", 10), ("Matemática", 10), ("Biologia", 4),
+        ("Química", 4),           ("Física", 4),      ("História", 4),
+        ("Geografia", 4),         ("Língua Inglesa", 2), ("Educação Física", 2),
+        ("Arte", 2),              ("Sociologia", 2),   ("Filosofia", 2)
     ]
     
     filestr = image_file.read()
@@ -24,79 +16,48 @@ def detectar_por_materias(image_file):
     thresh = cv2.adaptiveThreshold(cv2.GaussianBlur(gray, (5, 5), 0), 255, 
                                    cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
 
-    # Detecta os blocos retangulares das disciplinas
-    cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    blocos = [cv2.boundingRect(c) for c in cnts if cv2.boundingRect(c)[2] > 180]
-    
-    # Ordena: Linha primeiro (y), depois Coluna (x)
-    blocos.sort(key=lambda b: (b[1] // 100, b[0]))
+    # 1. Captura todos os quadradinhos de resposta da folha
+    cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    quadradinhos = []
+    for c in cnts:
+        x, y, w, h = cv2.boundingRect(c)
+        if 18 < w < 48 and 0.7 < (w/h) < 1.3:
+            quadradinhos.append((x, y, w, h, c))
 
-    resultado = {}
-    letras = ['A', 'B', 'C', 'D', 'E']
+    # 2. Ordena de cima para baixo
+    quadradinhos.sort(key=lambda q: q[1])
 
-    for i, (bx, by, bw, bh) in enumerate(blocos):
-        if i >= len(nomes_materias): break
-        materia = nomes_materias[i]
-        resultado[materia] = []
+    # 3. Agrupa em linhas de 5 (alternativas A,B,C,D,E)
+    questoes_lidas = []
+    for i in range(0, len(quadradinhos), 5):
+        linha = quadradinhos[i:i+5]
+        if len(linha) < 5: continue
+        linha.sort(key=lambda l: l[0]) # Ordena da esquerda para a direita (A -> E)
         
-        roi = thresh[by:by+bh, bx:bx+bw]
-        c_internos, _ = cv2.findContours(roi, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        votos = []
+        for (lx, ly, lw, lh, l_cnt) in linha:
+            mask = np.zeros(thresh.shape, dtype="uint8")
+            cv2.drawContours(mask, [l_cnt], -1, 255, -1)
+            votos.append(cv2.countNonZero(cv2.bitwise_and(thresh, thresh, mask=mask)))
         
-        sqs = []
-        for ci in c_internos:
-            ix, iy, iw, ih = cv2.boundingRect(ci)
-            if 15 < iw < 45 and 0.8 < (iw/ih) < 1.2:
-                sqs.append((ix, iy, ci))
-        
-        sqs.sort(key=lambda s: s[1]) # Ordena questões de cima para baixo
+        letras = ['A', 'B', 'C', 'D', 'E']
+        escolha = letras[np.argmax(votos)] if max(votos) > 40 else "?"
+        questoes_lidas.append({'x': linha[0][0], 'y': linha[0][1], 'res': escolha})
 
-        for j in range(0, len(sqs), 5):
-            linha = sqs[j:j+5]
-            if len(linha) < 5: continue
-            linha.sort(key=lambda s: s[0]) # Ordena A, B, C, D, E
-            
-            votos = []
-            for (_, _, c) in linha:
-                mask = np.zeros(roi.shape, dtype="uint8")
-                cv2.drawContours(mask, [c], -1, 255, -1)
-                votos.append(cv2.countNonZero(cv2.bitwise_and(roi, roi, mask=mask)))
-            
-            res = letras[np.argmax(votos)] if max(votos) > 45 else "?"
-            resultado[materia].append(res)
-    return resultado
+    # 4. ORDENAÇÃO POR COLUNAS (3 colunas por andar)
+    # Dividimos a folha em 4 "andares" horizontais baseados no Y
+    questoes_lidas.sort(key=lambda q: (q['y'] // 350, q['x']))
 
-@app.route("/")
-def index():
-    return render_template("index.html")
-
-@app.route("/api/extrair-gabarito", methods=["POST"])
-def api_extrair():
-    try:
-        f = request.files.get('imagem')
-        return jsonify({"gabarito": detectar_por_materias(f)})
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
-
-@app.route("/api/corrigir", methods=["POST"])
-def api_corrigir():
-    try:
-        f = request.files.get('imagem')
-        gab_mestre = json.loads(request.form.get('gabarito'))
-        nome = request.form.get('nome_aluno', 'Estudante')
-        res_aluno = detectar_por_materias(f)
-
-        acertos, total = 0, 0
-        for mat, q_mestre in gab_mestre.items():
-            q_aluno = res_aluno.get(mat, [])
-            for idx, resp in enumerate(q_mestre):
-                total += 1
-                if idx < len(q_aluno) and str(q_aluno[idx]) == str(resp):
-                    acertos += 1
-        
-        nota = round((acertos / total) * 10, 2) if total > 0 else 0
-        return jsonify({"nome": nome, "nota": nota, "acertos": acertos, "total": total})
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    # 5. DISTRIBUIÇÃO NAS MATÉRIAS (Garante o "pulo" correto de questões)
+    resultado_final = {}
+    ponteiro = 0
+    for nome, qtd in estrutura_prova:
+        resultado_final[nome] = []
+        for _ in range(qtd):
+            if ponteiro < len(questoes_lidas):
+                resultado_final[nome].append(questoes_lidas[ponteiro]['res'])
+                ponteiro += 1
+            else:
+                resultado_final[nome].append("?")
+                
+    return resultado_final
