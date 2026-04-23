@@ -5,89 +5,152 @@
     <title>Corretor Jales Machado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .materia-container { background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #38bdf8; }
-        .grid-q { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; margin-top: 8px; }
-        .q-card { background: #0f172a; padding: 5px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; }
-        input { color: black; font-weight: bold; width: 35px; text-align: center; border-radius: 3px; margin-top: 2px; }
+        /* Garante que o texto dentro dos inputs seja sempre visível */
+        .q-input {
+            color: #000000 !important;
+            background-color: #ffffff !important;
+            font-weight: bold;
+            width: 40px;
+            height: 35px;
+            text-align: center;
+            border-radius: 4px;
+            border: 2px solid #38bdf8;
+            font-size: 1.1rem;
+        }
+        .materia-card {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-top: 4px solid #38bdf8;
+        }
+        .grid-questoes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .q-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #0f172a;
+            padding: 5px;
+            border-radius: 6px;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-white p-4">
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-2xl font-bold text-center text-sky-400 mb-6">📋 Provão Jales Machado - 2026</h1>
+    <div class="max-w-5xl mx-auto">
+        <h1 class="text-3xl font-bold text-center text-sky-400 mb-8">📋 Sistema de Correção - Jales Machado</h1>
 
-        <div id="p1" class="bg-slate-800 p-6 rounded-lg">
-            <h2 class="mb-4">1. Foto do Gabarito Mestre</h2>
-            <input type="file" id="f_gab" class="mb-4 block w-full">
-            <button onclick="enviarGabarito()" id="b1" class="w-full bg-sky-600 p-3 rounded font-bold">Processar Blocos</button>
+        <div id="passo1" class="bg-slate-800 p-8 rounded-xl shadow-2xl border border-slate-700">
+            <h2 class="text-xl mb-4 font-semibold">1. Foto do Gabarito Mestre (Azul ou Preto)</h2>
+            <input type="file" id="foto_mestre" class="mb-6 block w-full text-slate-400">
+            <button onclick="processarMestre()" id="btn_mestre" class="w-full bg-sky-600 hover:bg-sky-500 p-4 rounded-lg font-black transition-all">
+                ANALISAR GABARITO
+            </button>
         </div>
 
-        <div id="p_revisao" class="hidden mt-6 bg-slate-800 p-6 rounded-lg">
-            <h2 class="text-yellow-400 font-bold mb-4">🔍 Revise por Matéria</h2>
-            <div id="lista_materias"></div>
-            <button onclick="confirmar()" class="w-full bg-green-600 p-3 rounded font-bold mt-4">Confirmar Gabarito</button>
+        <div id="passo_revisao" class="hidden mt-8 bg-slate-800 p-8 rounded-xl shadow-2xl">
+            <h2 class="text-2xl text-yellow-400 font-bold mb-6 italic">🔍 Revisão do Gabarito lido pelo OpenCV</h2>
+            <p class="text-slate-400 mb-6">As letras abaixo foram detectadas. Se houver erro ou "?", clique e digite a correta.</p>
+            
+            <div id="container_materias"></div>
+
+            <button onclick="confirmarGabarito()" class="w-full bg-green-600 hover:bg-green-500 p-4 rounded-lg font-black mt-6 shadow-lg transition-all">
+                CONFIRMAR GABARITO FINAL
+            </button>
         </div>
 
-        <div id="p2" class="hidden mt-6 bg-slate-800 p-6 rounded-lg">
-            <h2 class="text-green-400 font-bold mb-4">2. Corrigir Prova do Aluno</h2>
-            <input type="text" id="aluno" placeholder="Nome do Aluno" class="w-full p-2 mb-4 rounded text-black font-bold">
-            <input type="file" id="f_prova" class="mb-4 block w-full">
-            <button onclick="corrigir()" id="b2" class="w-full bg-green-600 p-3 rounded font-bold">Gerar Nota</button>
-            <div id="res" class="mt-6 text-center text-2xl font-bold text-sky-400"></div>
+        <div id="passo3" class="hidden mt-8 bg-slate-800 p-8 rounded-xl shadow-2xl">
+            <h2 class="text-green-400 font-bold mb-6">2. Corrigir Prova do Aluno</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <input type="text" id="nome_aluno" placeholder="Nome completo do aluno" class="p-3 rounded bg-white text-black font-bold">
+                <input type="file" id="foto_aluno" class="p-2 text-slate-400">
+            </div>
+            <button onclick="corrigirAluno()" id="btn_corrigir" class="w-full bg-green-600 p-4 rounded-lg font-black">
+                CALCULAR NOTA
+            </button>
+            <div id="resultado_final" class="mt-8 p-6 bg-slate-900 rounded-lg text-center hidden"></div>
         </div>
     </div>
 
     <script>
-        let gabaritoData = {};
+        let dadosGabarito = {};
 
-        async function enviarGabarito() {
-            const file = document.getElementById('f_gab').files[0];
-            if(!file) return alert("Selecione a foto!");
-            document.getElementById('b1').innerText = "Analisando...";
+        async function processarMestre() {
+            const file = document.getElementById('foto_mestre').files[0];
+            if(!file) return alert("Por favor, tire a foto do gabarito!");
 
+            document.getElementById('btn_mestre').innerText = "IDENTIFICANDO CORES...";
+            
             const fd = new FormData();
             fd.append('imagem', file);
 
-            const res = await fetch('/api/extrair-gabarito', { method: 'POST', body: fd });
-            gabaritoData = (await res.json()).gabarito;
-            
-            const lista = document.getElementById('lista_materias');
-            lista.innerHTML = '';
-            
-            for (const [mat, questoes] of Object.entries(gabaritoData)) {
-                let html = `<div class="materia-container"><h3 class="text-xs font-black">${mat}</h3><div class="grid-q">`;
-                questoes.forEach((letra, i) => {
-                    html += `
-                        <div class="q-card">
-                            <span class="text-[9px]">Q${i+1}</span>
-                            <input type="text" value="${letra}" onchange="gabaritoData['${mat}'][${i}]=this.value.toUpperCase()">
-                        </div>`;
-                });
-                lista.innerHTML += html + `</div></div>`;
+            try {
+                const res = await fetch('/api/extrair-gabarito', { method: 'POST', body: fd });
+                const data = await res.json();
+                dadosGabarito = data.gabarito;
+
+                const container = document.getElementById('container_materias');
+                container.innerHTML = '';
+
+                for (const [materia, questoes] of Object.entries(dadosGabarito)) {
+                    let html = `
+                        <div class="materia-card">
+                            <h3 class="text-sky-300 font-black uppercase text-sm mb-3">${materia}</h3>
+                            <div class="grid-questoes">`;
+                    
+                    questoes.forEach((letra, i) => {
+                        html += `
+                            <div class="q-box">
+                                <span class="text-[10px] text-slate-500 mb-1">Q${i+1}</span>
+                                <input type="text" class="q-input" value="${letra}" 
+                                    oninput="this.value = this.value.toUpperCase()"
+                                    onchange="dadosGabarito['${materia}'][${i}] = this.value">
+                            </div>`;
+                    });
+                    
+                    html += `</div></div>`;
+                    container.innerHTML += html;
+                }
+
+                document.getElementById('passo1').classList.add('hidden');
+                document.getElementById('passo_revisao').classList.remove('hidden');
+            } catch (e) {
+                alert("Erro no servidor. Verifique o console.");
             }
-            document.getElementById('p1').classList.add('hidden');
-            document.getElementById('p_revisao').classList.remove('hidden');
         }
 
-        function confirmar() {
-            document.getElementById('p_revisao').classList.add('hidden');
-            document.getElementById('p2').classList.remove('hidden');
+        function confirmarGabarito() {
+            document.getElementById('passo_revisao').classList.add('hidden');
+            document.getElementById('passo3').classList.remove('hidden');
         }
 
-        async function corrigir() {
-            const f = document.getElementById('f_prova').files[0];
-            const n = document.getElementById('aluno').value;
-            if(!f || !n) return alert("Faltam dados!");
+        async function corrigirAluno() {
+            const f = document.getElementById('foto_aluno').files[0];
+            const n = document.getElementById('nome_aluno').value;
+            if(!f || !n) return alert("Preencha o nome e selecione a foto da prova!");
 
-            document.getElementById('b2').innerText = "Corrigindo...";
+            document.getElementById('btn_corrigir').innerText = "CORRIGINDO...";
+            
             const fd = new FormData();
             fd.append('imagem', f);
             fd.append('nome_aluno', n);
-            fd.append('gabarito', JSON.stringify(gabaritoData));
+            fd.append('gabarito', JSON.stringify(dadosGabarito));
 
             const res = await fetch('/api/corrigir', { method: 'POST', body: fd });
             const d = await res.json();
-            document.getElementById('res').innerHTML = `Aluno: ${d.nome}<br>Nota: ${d.nota}<br><span class="text-sm">Acertos: ${d.acertos}/${d.total}</span>`;
-            document.getElementById('b2').innerText = "Gerar Nota";
+            
+            const resDiv = document.getElementById('resultado_final');
+            resDiv.classList.remove('hidden');
+            resDiv.innerHTML = `
+                <h3 class="text-xl text-white">ALUNO: <span class="text-sky-400">${d.nome}</span></h3>
+                <div class="text-5xl font-black text-green-400 my-4">${d.nota}</div>
+                <p class="text-slate-400 text-lg">Acertou ${d.acertos} de ${d.total} questões</p>
+            `;
+            document.getElementById('btn_corrigir').innerText = "CALCULAR NOTA";
         }
     </script>
 </body>
