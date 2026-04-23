@@ -4,57 +4,61 @@ import numpy as np
 import json
 from flask import Flask, request, jsonify, render_template
 
-# Inicialização obrigatória para o Gunicorn encontrar o 'app'
+# Gunicorn precisa desta variável 'app' no nível zero do arquivo
 app = Flask(__name__)
 
-def detectar_por_blocos(image_file, num_questoes_total):
-    # Converte imagem vinda do formulário para formato OpenCV
+def processar_gabarito_jales(image_file, num_total):
+    # Lê a imagem do buffer
     filestr = image_file.read()
     nparr = np.frombuffer(filestr, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     
     if img is None:
-        return {str(i): "?" for i in range(1, num_questoes_total + 1)}
+        return {str(i): "?" for i in range(1, num_total + 1)}
 
-    # Pré-processamento
+    # 1. PRÉ-PROCESSAMENTO: Focar em contornos de caixas
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    # Threshold adaptativo para fotos com iluminação irregular
     thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
                                    cv2.THRESH_BINARY_INV, 11, 2)
-
-    # 1. Localizar os grandes blocos (matérias)
+    
+    # 2. DETECTAR BLOCOS DE MATÉRIAS
     cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     blocos = []
     for c in cnts:
         x, y, w, h = cv2.boundingRect(c)
-        if w > 100 and h > 80: # Filtra retângulos das disciplinas
+        # Filtra retângulos compatíveis com os blocos de matérias
+        if w > 150 and h > 80:
             blocos.append((x, y, w, h))
 
-    # Ordena blocos: cima para baixo, esquerda para direita
-    blocos.sort(key=lambda b: (b[1] // 50, b[0]))
+    # ORDENAÇÃO POR COLUNAS E LINHAS (Crucial para o layout de 3 colunas)
+    # Agrupa blocos em "faixas" de 100px de altura para ler da esquerda para a direita
+    blocos.sort(key=lambda b: (b[1] // 100, b[0]))
 
     respostas = {}
-    q_idx = 1
-    alternativas = ['A', 'B', 'C', 'D', 'E']
+    q_global = 1
+    letras = ['A', 'B', 'C', 'D', 'E']
 
     for (bx, by, bw, bh) in blocos:
         roi = thresh[by:by+bh, bx:bx+bw]
-        # Localiza os quadradinhos de cada questão dentro do bloco
+        # Encontra os quadradinhos das alternativas dentro do bloco
         c_internos, _ = cv2.findContours(roi, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         
         sqs = []
         for ci in c_internos:
             ix, iy, iw, ih = cv2.boundingRect(ci)
             ar = iw / float(ih)
+            # Filtra apenas o tamanho de uma "bolinha" de gabarito
             if 15 < iw < 45 and 0.7 < ar < 1.3:
                 sqs.append((ix, iy, iw, ih, ci))
         
-        # Ordena por linha
+        # Ordena as alternativas do bloco de cima para baixo
         sqs.sort(key=lambda s: s[1])
 
-        # Agrupa de 5 em 5 (as 5 alternativas de uma questão)
+        # Processa cada linha de 5 alternativas
         for i in range(0, len(sqs), 5):
-            if q_idx > num_questoes_total: break
+            if q_global > num_total: break
             
             linha = sqs[i:i+5]
             if len(linha) < 5: continue
@@ -67,11 +71,16 @@ def detectar_por_blocos(image_file, num_questoes_total):
                 mask = cv2.bitwise_and(roi, roi, mask=mask)
                 votos.append(cv2.countNonZero(mask))
             
-            respostas[str(q_idx)] = alternativas[np.argmax(votos)] if max(votos) > 40 else "?"
-            q_idx += 1
+            # Se o maior preenchimento for significativo, registra a letra
+            maior_voto = np.argmax(votos)
+            if votos[maior_voto] > 45: # Sensibilidade do preenchimento
+                respostas[str(q_global)] = letras[maior_voto]
+            else:
+                respostas[str(q_global)] = "?"
+            q_global += 1
 
-    # Preenche o restante se o OpenCV pular algo
-    for i in range(1, num_questoes_total + 1):
+    # Preenchimento de segurança para garantir que a tabela no HTML não quebre
+    for i in range(1, num_total + 1):
         if str(i) not in respostas: respostas[str(i)] = "?"
             
     return respostas
@@ -81,13 +90,11 @@ def index():
     return render_template("index.html")
 
 @app.route("/api/extrair-gabarito", methods=["POST"])
-def api_extrair_gabarito():
+def api_extrair():
     try:
-        file = request.files.get("imagem")
-        num_q = int(request.form.get("num_questoes", 50))
-        if not file: return jsonify({"erro": "Sem imagem"}), 400
-        
-        res = detectar_por_blocos(file, num_q)
+        f = request.files.get('imagem')
+        n = int(request.form.get('num_questoes', 50))
+        res = processar_gabarito_jales(f, n)
         return jsonify({"gabarito": res})
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
@@ -95,22 +102,20 @@ def api_extrair_gabarito():
 @app.route("/api/corrigir", methods=["POST"])
 def api_corrigir():
     try:
-        file = request.files.get("imagem")
-        gabarito = json.loads(request.form.get("gabarito"))
-        nome = request.form.get("nome_aluno", "Aluno")
-
-        res_aluno = detectar_por_blocos(file, len(gabarito))
-
+        f = request.files.get('imagem')
+        gab = json.loads(request.form.get('gabarito'))
+        nome = request.form.get('nome_aluno', 'Estudante')
+        
+        # Detecta as respostas na folha do aluno
+        res_aluno = processar_gabarito_jales(f, len(gab))
+        
         acertos = 0
-        detalhes = {}
-        for q, resp_correta in gabarito.items():
-            resp_aluno = res_aluno.get(q, "?")
-            acertou = str(resp_aluno) == str(resp_correta)
-            if acertou: acertos += 1
-            detalhes[q] = {"gabarito": resp_correta, "resposta": resp_aluno, "acertou": acertou}
-
-        nota = round((acertos / len(gabarito)) * 10, 2)
-        return jsonify({"nome_aluno": nome, "nota": nota, "acertos": acertos, "total": len(gabarito), "detalhes": detalhes})
+        for q, correta in gab.items():
+            if str(res_aluno.get(q)) == str(correta):
+                acertos += 1
+        
+        nota = round((acertos / len(gab)) * 10, 2)
+        return jsonify({"nome": nome, "nota": nota, "acertos": acertos, "total": len(gab)})
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
