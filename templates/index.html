@@ -1,273 +1,192 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3 Corretor Pro - Gestão Escolar</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <title>Corretor Provas - Escola Jales Machado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg: #0d0f14;
-            --surface: #13161e;
-            --surface2: #1a1e2a;
-            --border: #252a38;
-            --accent: #4f8ef7;
-            --accent2: #7c5cfc;
-            --green: #22d67a;
-            --red: #f7524f;
-            --yellow: #f5c842;
-            --text: #e8eaf2;
-            --muted: #6b7280;
-            --radius: 12px;
+        .grid-questoes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 10px;
+            background: #1e293b;
+            border-radius: 8px;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5; }
-
-        header { border-bottom: 1px solid var(--border); padding: 18px 32px; display: flex; align-items: center; gap: 14px; background: var(--surface); }
-        .logo-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        header h1 { font-size: 1.1rem; font-weight: 600; }
-        header span { font-size: 0.75rem; color: var(--muted); margin-left: 8px; font-weight: 300; }
-
-        .container { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
-
-        /* STEPS */
-        .steps { display: flex; margin-bottom: 40px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-        .step { flex: 1; padding: 14px 20px; background: var(--surface); display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.2s; border-right: 1px solid var(--border); }
-        .step.active { background: var(--surface2); }
-        .step.done { opacity: 0.6; }
-        .step-num { width: 26px; height: 26px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
-        .step.active .step-num { background: var(--accent); color: #fff; }
-        .step-label { font-size: 0.82rem; font-weight: 500; }
-
-        .panel { display: none; }
-        .panel.active { display: block; }
-        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-bottom: 20px; }
-        .card-title { font-size: 0.85rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
-
-        /* UPLOAD */
-        .upload-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 48px 24px; text-align: center; cursor: pointer; position: relative; transition: 0.2s; }
-        .upload-zone:hover { border-color: var(--accent); background: rgba(79,142,247,0.05); }
-        .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-        .preview-img { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 16px; border: 1px solid var(--border); }
-
-        /* GRID */
-        .gabarito-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-        .gabarito-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 8px; }
-        .gab-input { width: 50px; background: var(--bg); border: 1px solid var(--border); color: var(--accent); text-align: center; font-weight: bold; padding: 5px; border-radius: 4px; }
-
-        /* BUTTONS */
-        .btn { padding: 12px 24px; border-radius: 8px; border: none; font-family: inherit; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-
-        .loading { display: none; align-items: center; gap: 10px; color: var(--muted); margin-top: 15px; }
-        .loading.visible { display: flex; }
-        .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .nota-hero { text-align: center; padding: 40px; background: var(--surface2); border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px; }
-        .nota-value { font-size: 4.5rem; font-weight: 800; font-family: 'JetBrains Mono'; color: var(--accent); }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; color: var(--muted); font-size: 0.75rem; padding: 12px; border-bottom: 1px solid var(--border); }
-        td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
-        .badge-green { background: rgba(34,214,122,0.15); color: var(--green); }
-        .badge-red { background: rgba(247,82,79,0.15); color: var(--red); }
+        .questao-card {
+            background: #334155;
+            padding: 8px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .input-alternativa {
+            width: 35px;
+            text-align: center;
+            background: #0f172a;
+            color: #38bdf8;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
     </style>
 </head>
-<body>
+<body class="bg-slate-900 text-white min-h-screen p-4 md:p-8">
 
-<header>
-    <div class="logo-icon">📋</div>
-    <h1>Corretor Local 2  <span>Processamento Gratuito</span></h1>
-</header>
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-sky-400">📋 Corretor de Provas IA</h1>
+            <p class="text-slate-400">Escola Estadual Deputado Jales Machado</p>
+        </header>
 
-<div class="container">
-    <div class="steps">
-        <div class="step active" id="step1-tab" onclick="goToStep(1)">
-            <div class="step-num">1</div>
-            <div class="step-label">Gabarito</div>
-        </div>
-        <div class="step" id="step2-tab" onclick="goToStep(2)">
-            <div class="step-num">2</div>
-            <div class="step-label">Revisar</div>
-        </div>
-        <div class="step" id="step3-tab" onclick="goToStep(3)">
-            <div class="step-num">3</div>
-            <div class="step-label">Prova</div>
-        </div>
-        <div class="step" id="step4-tab" onclick="goToStep(4)">
-            <div class="step-num">4</div>
-            <div class="step-label">Nota</div>
-        </div>
-    </div>
-
-    <div class="panel active" id="panel1">
-        <div class="card">
-            <div class="card-title">📸 Foto do Gabarito Mestre</div>
-            <div class="upload-zone">
-                <input type="file" id="gabarito-file" accept="image/*" capture="environment">
-                <div style="font-size: 2rem;">📷</div>
-                <strong>Clique para fotografar o gabarito oficial</strong>
-                <p style="font-size: 0.8rem; color: var(--muted);">O sistema identificará as respostas via OpenCV</p>
-                <img id="gabarito-preview" class="preview-img" style="display:none">
-            </div>
-            <div style="margin-top: 20px;">
-                <label style="font-size: 0.8rem; color: var(--muted);">Quantidade de Questões</label>
-                <input type="number" id="num-questoes" value="10" min="1" max="50" style="width: 100%; padding: 10px; background: var(--surface2); border: 1px solid var(--border); color: white; border-radius: 8px;">
-            </div>
-        </div>
-        <button class="btn btn-primary" onclick="extrairGabarito()" id="btn-extrair">Processar Imagem Localmente</button>
-        <div class="loading" id="loading1"><div class="spinner"></div> Processando no servidor...</div>
-    </div>
-
-    <div class="panel" id="panel2">
-        <div class="card">
-            <div class="card-title">🔍 Revisão do Gabarito</div>
-            <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 20px;">O OpenCV sugeriu estas respostas. Clique nos campos para corrigir se houver erro de leitura.</p>
-            <div class="gabarito-grid" id="gabarito-grid"></div>
-        </div>
-        <div class="btn-row">
-            <button class="btn btn-secondary" onclick="goToStep(1)">Voltar</button>
-            <button class="btn btn-primary" onclick="goToStep(3)">Tudo Certo, Próximo</button>
-        </div>
-    </div>
-
-    <div class="panel" id="panel3">
-        <div class="card">
-            <div class="card-title">📝 Identificação e Prova</div>
-            <input type="text" id="nome-aluno" placeholder="Nome do Aluno" style="width: 100%; padding: 12px; background: var(--surface2); border: 1px solid var(--border); color: white; border-radius: 8px; margin-bottom: 20px;">
-            <div class="upload-zone">
-                <input type="file" id="prova-file" accept="image/*" capture="environment">
-                <div style="font-size: 2rem;">📄</div>
-                <strong>Fotografar folha de respostas do aluno</strong>
-                <img id="prova-preview" class="preview-img" style="display:none">
-            </div>
-        </div>
-        <button class="btn btn-primary" onclick="corrigirProva()" id="btn-corrigir">Calcular Nota Agora</button>
-        <div class="loading" id="loading3"><div class="spinner"></div> Cruzando dados...</div>
-    </div>
-
-    <div class="panel" id="panel4">
-        <div class="nota-hero">
-            <div id="aluno-nome-res" style="font-size: 1rem; color: var(--muted); margin-bottom: 10px;"></div>
-            <div class="nota-value" id="nota-res">0.0</div>
-            <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px;">Nota Final</div>
-        </div>
-        <div class="card">
-            <table>
-                <thead>
-                    <tr><th>Questão</th><th>Gabarito</th><th>Aluno</th><th>Status</th></tr>
-                </thead>
-                <tbody id="detalhes-res"></tbody>
-            </table>
-        </div>
-        <button class="btn btn-secondary" onclick="location.reload()">Nova Correção</button>
-    </div>
-</div>
-
-<script>
-    let gabaritoData = {};
-
-    function preview(input, imgId) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = e => { 
-                const img = document.getElementById(imgId);
-                img.src = e.target.result;
-                img.style.display = 'block';
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    document.getElementById('gabarito-file').onchange = function() { preview(this, 'gabarito-preview'); };
-    document.getElementById('prova-file').onchange = function() { preview(this, 'prova-preview'); };
-
-    function goToStep(n) {
-        document.querySelectorAll('.panel').forEach((p, i) => p.classList.toggle('active', i+1 === n));
-        document.querySelectorAll('.step').forEach((s, i) => {
-            s.classList.toggle('active', i+1 === n);
-            s.classList.toggle('done', i+1 < n);
-        });
-    }
-
-    async function extrairGabarito() {
-        const file = document.getElementById('gabarito-file').files[0];
-        if(!file) return alert("Selecione a foto!");
-        
-        const loader = document.getElementById('loading1');
-        loader.classList.add('visible');
-
-        const fd = new FormData();
-        fd.append('imagem', file);
-        fd.append('num_questoes', document.getElementById('num-questoes').value);
-
-        try {
-            const res = await fetch('/api/extrair-gabarito', { method: 'POST', body: fd });
-            const data = await res.json();
-            gabaritoData = data.gabarito;
-            renderGrid();
-            goToStep(2);
-        } catch (e) { alert("Erro no processamento"); }
-        finally { loader.classList.remove('visible'); }
-    }
-
-    function renderGrid() {
-        const grid = document.getElementById('gabarito-grid');
-        grid.innerHTML = '';
-        Object.keys(gabaritoData).forEach(q => {
-            grid.innerHTML += `
-                <div class="gabarito-item">
-                    <span style="font-size:0.7rem; width:25px">Q${q}</span>
-                    <input type="text" class="gab-input" data-q="${q}" value="${gabaritoData[q]}" maxlength="1" oninput="this.value = this.value.toUpperCase()">
+        <div id="passo1" class="bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700">
+            <h2 class="text-xl font-semibold mb-4 flex items-center">
+                <span class="bg-sky-500 text-white w-8 h-8 rounded-full flex items-center justify-center mr-2">1</span>
+                Configurar Gabarito Oficial
+            </h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Total de Questões na Folha</label>
+                    <input type="number" id="num_questoes" value="50" class="w-full bg-slate-900 border border-slate-700 p-2 rounded">
                 </div>
-            `;
-        });
-    }
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Foto do Gabarito Preenchido</label>
+                    <input type="file" id="img_gabarito" accept="image/*" class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-500 file:text-white hover:file:bg-sky-600">
+                </div>
+                <button onclick="extrairGabarito()" id="btn_extrair" class="w-full bg-sky-600 hover:bg-sky-500 py-3 rounded-lg font-bold transition">
+                    Processar Gabarito com OpenCV
+                </button>
+            </div>
+        </div>
 
-    async function corrigirProva() {
-        const file = document.getElementById('prova-file').files[0];
-        if(!file) return alert("Tire a foto da prova!");
-
-        // Atualiza gabarito com o que o usuário editou na grade
-        const finalGab = {};
-        document.querySelectorAll('.gab-input').forEach(i => finalGab[i.dataset.q] = i.value);
-
-        const loader = document.getElementById('loading3');
-        loader.classList.add('visible');
-
-        const fd = new FormData();
-        fd.append('imagem', file);
-        fd.append('gabarito', JSON.stringify(finalGab));
-        fd.append('nome_aluno', document.getElementById('nome-aluno').value);
-
-        try {
-            const res = await fetch('/api/corrigir', { method: 'POST', body: fd });
-            const data = await res.json();
+        <div id="passo2" class="hidden bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700 mt-6">
+            <h2 class="text-xl font-semibold mb-2">🔍 Revisão do Gabarito</h2>
+            <p class="text-sm text-slate-400 mb-4">Confira se o OpenCV leu corretamente. Clique na letra para editar.</p>
             
-            document.getElementById('nota-res').innerText = data.nota;
-            document.getElementById('aluno-nome-res').innerText = data.nome_aluno;
+            <div id="grade_revisao" class="grid-questoes mb-6">
+                </div>
+
+            <div class="flex gap-4">
+                <button onclick="location.reload()" class="flex-1 bg-slate-700 hover:bg-slate-600 py-2 rounded-lg font-bold">Voltar</button>
+                <button onclick="proximoParaAlunos()" class="flex-1 bg-green-600 hover:bg-green-500 py-2 rounded-lg font-bold">Tudo Certo, Próximo</button>
+            </div>
+        </div>
+
+        <div id="passo3" class="hidden bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700 mt-6">
+            <h2 class="text-xl font-semibold mb-4 flex items-center">
+                <span class="bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center mr-2">2</span>
+                Corrigir Prova do Aluno
+            </h2>
+            <div class="space-y-4">
+                <input type="text" id="nome_aluno" placeholder="Nome do Aluno" class="w-full bg-slate-900 border border-slate-700 p-2 rounded">
+                <input type="file" id="img_aluno" accept="image/*" class="w-full text-sm text-slate-400 file:bg-green-600 file:text-white file:rounded-full file:px-4 file:py-2 file:border-0">
+                <button onclick="corrigirProva()" id="btn_corrigir" class="w-full bg-green-600 hover:bg-green-500 py-3 rounded-lg font-bold transition">
+                    Corrigir e Gerar Nota
+                </button>
+            </div>
+            <div id="resultado" class="mt-6 p-4 bg-slate-900 rounded-lg hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        let gabaritoFinal = {};
+
+        async function extrairGabarito() {
+            const btn = document.getElementById('btn_extrair');
+            const img = document.getElementById('img_gabarito').files[0];
+            const num = document.getElementById('num_questoes').value;
+
+            if(!img) return alert("Selecione a foto do gabarito!");
             
-            const tbody = document.getElementById('detalhes-res');
-            tbody.innerHTML = '';
-            Object.entries(data.detalhes).forEach(([q, d]) => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>Q${q}</td>
-                        <td><span class="badge badge-green">${d.gabarito}</span></td>
-                        <td><span class="badge ${d.acertou?'badge-green':'badge-red'}">${d.resposta}</span></td>
-                        <td>${d.acertou?'✅':'❌'}</td>
-                    </tr>
+            btn.innerText = "Processando Blocos...";
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('imagem', img);
+            formData.append('num_questoes', num);
+
+            try {
+                const res = await fetch('/api/extrair-gabarito', { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                if(data.erro) throw new Error(data.erro);
+
+                gabaritoFinal = data.gabarito;
+                renderizarRevisao();
+                document.getElementById('passo1').classList.add('hidden');
+                document.getElementById('passo2').classList.remove('hidden');
+            } catch (e) {
+                alert("Erro: " + e.message);
+            } finally {
+                btn.innerText = "Processar Gabarito com OpenCV";
+                btn.disabled = false;
+            }
+        }
+
+        function renderizarRevisao() {
+            const grid = document.getElementById('grade_revisao');
+            grid.innerHTML = '';
+            
+            Object.keys(gabaritoFinal).forEach(num => {
+                grid.innerHTML += `
+                    <div class="questao-card">
+                        <span class="text-xs text-slate-400 font-bold">Q${num}</span>
+                        <input type="text" maxlength="1" value="${gabaritoFinal[num]}" 
+                            class="input-alternativa" oninput="atualizarGabarito('${num}', this.value)">
+                    </div>
                 `;
             });
-            goToStep(4);
-        } catch (e) { alert("Erro na correção"); }
-        finally { loader.classList.remove('visible'); }
-    }
-</script>
+        }
 
+        function atualizarGabarito(num, valor) {
+            gabaritoFinal[num] = valor.toUpperCase();
+        }
+
+        function proximoParaAlunos() {
+            document.getElementById('passo2').classList.add('hidden');
+            document.getElementById('passo3').classList.remove('hidden');
+        }
+
+        async function corrigirProva() {
+            const btn = document.getElementById('btn_corrigir');
+            const img = document.getElementById('img_aluno').files[0];
+            const nome = document.getElementById('nome_aluno').value;
+
+            if(!img || !nome) return alert("Preencha o nome e a foto da prova!");
+
+            btn.innerText = "Calculando Nota...";
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('imagem', img);
+            formData.append('nome_aluno', nome);
+            formData.append('gabarito', JSON.stringify(gabaritoFinal));
+
+            try {
+                const res = await fetch('/api/corrigir', { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                const resDiv = document.getElementById('resultado');
+                resDiv.classList.remove('hidden');
+                resDiv.innerHTML = `
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-sky-400">${data.nome_aluno}</h3>
+                        <div class="text-4xl font-black my-2">${data.nota}</div>
+                        <p class="text-slate-400">Acertos: ${data.acertos} de ${data.total}</p>
+                    </div>
+                `;
+            } catch (e) {
+                alert("Erro na correção: " + e.message);
+            } finally {
+                btn.innerText = "Corrigir e Gerar Nota";
+                btn.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>
