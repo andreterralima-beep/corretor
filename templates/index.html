@@ -196,7 +196,7 @@
     font-size: 0.85rem;
   }
 
-  /* REVISÃO */
+  /* REVISÃO MANUAL */
   .revisao-item {
     background: var(--surface2);
     border: 1px solid var(--border);
@@ -210,7 +210,7 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.75rem;
     color: var(--muted);
-    min-width: 46px;
+    min-width: 50px;
   }
   .revisao-item .gab-badge b { color: var(--green); }
   .revisao-item input[type=text] {
@@ -436,30 +436,12 @@
     </div>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="goToStep(2)">← Voltar</button>
-      <button class="btn btn-primary" onclick="lerProva()" id="btn-corrigir">
-        <span>🔍</span> Ler Respostas com IA
+      <button class="btn btn-primary" onclick="corrigirProva()" id="btn-corrigir">
+        <span>🎯</span> Corrigir Prova
       </button>
     </div>
-    <div class="loading" id="loading3"><div class="spinner"></div> Lendo respostas da prova...</div>
+    <div class="loading" id="loading3"><div class="spinner"></div> Corrigindo prova...</div>
     <div id="msg3"></div>
-
-    <!-- Card de revisão manual — aparece após a IA ler a prova -->
-    <div class="card" id="card-revisao" style="display:none; margin-top:20px;">
-      <div class="card-title">✏️ Revisar Respostas Lidas pela IA</div>
-      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;">
-        Confira cada resposta identificada. Verde = acerto, Vermelho = erro, Amarelo = em branco.
-        Clique no campo e corrija manualmente se a IA leu errado.
-      </p>
-      <div id="revisao-grid" class="gabarito-grid"></div>
-      <div class="btn-row">
-        <button class="btn btn-primary" onclick="confirmarECalcular()">
-          ✅ Confirmar e Calcular Nota
-        </button>
-        <button class="btn btn-secondary" onclick="lerProva()">
-          🔄 Reler com IA
-        </button>
-      </div>
-    </div>
   </div>
 
   <!-- PANEL 4: Resultado -->
@@ -473,6 +455,10 @@
 
     <div class="card">
       <div class="card-title">🔍 Detalhes por Questão</div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;">
+        Corrija manualmente qualquer questão que a IA leu errado e clique em <b>Recalcular Nota</b>.
+      </p>
+      <div id="revisao-resultado-grid" class="gabarito-grid" style="margin-bottom:16px;"></div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -490,6 +476,7 @@
     </div>
 
     <div class="btn-row">
+      <button class="btn btn-primary" onclick="recalcularNota()">🔁 Recalcular Nota</button>
       <button class="btn btn-secondary" onclick="novaCorrecao()">🔄 Nova Correção (mesmo gabarito)</button>
       <button class="btn btn-secondary" onclick="resetAll()">🆕 Recomeçar tudo</button>
       <button class="btn btn-primary print-btn" onclick="window.print()">🖨️ Imprimir</button>
@@ -500,9 +487,9 @@
 
 <script>
   let gabaritoData = {};
-  let respostasLidas = {};  // respostas lidas pela IA, editáveis antes de calcular
+  let respostasEditaveis = {};  // respostas exibidas no resultado, editáveis
 
-  // ─── Preview de imagens ───────────────────────────────────────
+  // Preview images
   document.getElementById('gabarito-file').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -535,7 +522,6 @@
     zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); });
   });
 
-  // ─── Navegação entre steps ────────────────────────────────────
   function goToStep(n) {
     if (n > 2 && Object.keys(gabaritoData).length === 0) return;
     [1,2,3,4].forEach(i => {
@@ -551,7 +537,6 @@
     el.innerHTML = `<div class="alert alert-${type === 'error' ? 'error' : 'success'}">${msg}</div>`;
   }
 
-  // ─── Step 1: Extrair gabarito ─────────────────────────────────
   async function extrairGabarito() {
     const file = document.getElementById('gabarito-file').files[0];
     const numQ = parseInt(document.getElementById('num-questoes').value);
@@ -599,6 +584,7 @@
       `;
       grid.appendChild(item);
     }
+    // Sync changes back to gabaritoData
     grid.querySelectorAll('.gab-input').forEach(inp => {
       inp.addEventListener('input', () => {
         gabaritoData[inp.dataset.q] = inp.value.toUpperCase();
@@ -623,40 +609,33 @@
     return g;
   }
 
-  // ─── Step 3: Ler prova com IA ─────────────────────────────────
-  async function lerProva() {
+  async function corrigirProva() {
     const file = document.getElementById('prova-file').files[0];
+    const nome = document.getElementById('nome-aluno').value.trim() || 'Aluno';
     const msg = document.getElementById('msg3');
     msg.innerHTML = '';
 
     if (!file) { showMsg(msg, 'Selecione a foto da prova do aluno.'); return; }
 
     const gabConfirmado = getGabaritoConfirmado();
+    const pesos = getPesos();
+
     const btn = document.getElementById('btn-corrigir');
     btn.disabled = true;
     document.getElementById('loading3').classList.add('visible');
-    // Esconde revisão anterior enquanto relê
-    document.getElementById('card-revisao').style.display = 'none';
 
     const fd = new FormData();
     fd.append('imagem', file);
     fd.append('gabarito', JSON.stringify(gabConfirmado));
+    fd.append('pesos', JSON.stringify(pesos));
+    fd.append('nome_aluno', nome);
 
     try {
-      const res = await fetch('/api/ler-prova', { method: 'POST', body: fd });
+      const res = await fetch('/api/corrigir', { method: 'POST', body: fd });
       const data = await res.json();
       if (data.erro) throw new Error(data.erro);
-
-      respostasLidas = data.respostas;
-      buildRevisaoGrid(gabConfirmado, respostasLidas);
-      document.getElementById('card-revisao').style.display = 'block';
-
-      // Conta quantas ficaram em branco/null
-      const emBranco = Object.values(respostasLidas).filter(v => !v).length;
-      const avisoExtra = emBranco > 0
-        ? ` <span style="color:var(--yellow)">⚠️ ${emBranco} questão(ões) não identificadas — verifique manualmente.</span>`
-        : '';
-      showMsg(msg, `✅ Leitura concluída. Revise as respostas antes de confirmar.${avisoExtra}`, 'success');
+      renderResultado(data);
+      goToStep(4);
     } catch(e) {
       showMsg(msg, `Erro: ${e.message}`);
     } finally {
@@ -665,14 +644,38 @@
     }
   }
 
-  // ─── Grid de revisão manual ───────────────────────────────────
-  function buildRevisaoGrid(gabarito, respostas) {
-    const grid = document.getElementById('revisao-grid');
+  function renderResultado(data) {
+    document.getElementById('nota-display').textContent = data.nota.toFixed(1);
+    document.getElementById('acertos-display').textContent =
+      `${data.acertos} de ${data.total} questões corretas`;
+    document.getElementById('aluno-display').textContent = `Aluno: ${data.nome_aluno}`;
+
+    // Color nota
+    const notaEl = document.getElementById('nota-display');
+    const nota = data.nota;
+    if (nota >= 7) notaEl.style.background = `linear-gradient(135deg, var(--green), #1ab06a)`;
+    else if (nota >= 5) notaEl.style.background = `linear-gradient(135deg, var(--yellow), #e0b020)`;
+    else notaEl.style.background = `linear-gradient(135deg, var(--red), #c93f3d)`;
+    notaEl.style.webkitBackgroundClip = 'text';
+    notaEl.style.webkitTextFillColor = 'transparent';
+
+    // Salva respostas para edição manual
+    respostasEditaveis = {};
+    Object.entries(data.detalhes).forEach(([q, d]) => {
+      respostasEditaveis[q] = d.resposta === '—' ? '' : d.resposta;
+    });
+
+    buildRevisaoResultadoGrid(data.detalhes);
+    buildTabela(data.detalhes);
+  }
+
+  function buildRevisaoResultadoGrid(detalhes) {
+    const grid = document.getElementById('revisao-resultado-grid');
     grid.innerHTML = '';
 
-    Object.keys(gabarito).sort((a, b) => parseInt(a) - parseInt(b)).forEach(q => {
-      const gab = (gabarito[q] || '?').toUpperCase();
-      const resp = (respostas[q] || '').toUpperCase();
+    Object.entries(detalhes).sort((a,b) => parseInt(a[0])-parseInt(b[0])).forEach(([q, d]) => {
+      const gab = d.gabarito.toUpperCase();
+      const resp = (d.resposta === '—' ? '' : d.resposta).toUpperCase();
 
       let classeInput = 'vazio';
       if (resp) classeInput = resp === gab ? 'acerto' : 'erro';
@@ -695,12 +698,11 @@
       grid.appendChild(item);
     });
 
-    // Atualiza cor e respostasLidas ao editar
     grid.querySelectorAll('.resp-edit').forEach(inp => {
       inp.addEventListener('input', () => {
         const v = inp.value.toUpperCase();
         inp.value = v;
-        respostasLidas[inp.dataset.q] = v || null;
+        respostasEditaveis[inp.dataset.q] = v;
         inp.classList.remove('acerto', 'erro', 'vazio');
         if (!v) inp.classList.add('vazio');
         else if (v === inp.dataset.gab) inp.classList.add('acerto');
@@ -709,54 +711,12 @@
     });
   }
 
-  // ─── Confirmar revisão e calcular nota ───────────────────────
-  async function confirmarECalcular() {
-    // Garante que respostasLidas reflete edições manuais
-    document.querySelectorAll('.resp-edit').forEach(inp => {
-      respostasLidas[inp.dataset.q] = inp.value.toUpperCase() || null;
-    });
-
-    const gabConfirmado = getGabaritoConfirmado();
-    const pesos = getPesos();
-    const nome = document.getElementById('nome-aluno').value.trim() || 'Aluno';
-
-    const fd = new FormData();
-    fd.append('gabarito', JSON.stringify(gabConfirmado));
-    fd.append('respostas', JSON.stringify(respostasLidas));
-    fd.append('pesos', JSON.stringify(pesos));
-    fd.append('nome_aluno', nome);
-
-    try {
-      const res = await fetch('/api/calcular-nota', { method: 'POST', body: fd });
-      const data = await res.json();
-      if (data.erro) throw new Error(data.erro);
-      renderResultado(data);
-      goToStep(4);
-    } catch(e) {
-      document.getElementById('msg3').innerHTML =
-        `<div class="alert alert-error">Erro: ${e.message}</div>`;
-    }
-  }
-
-  // ─── Renderizar resultado ─────────────────────────────────────
-  function renderResultado(data) {
-    document.getElementById('nota-display').textContent = data.nota.toFixed(1);
-    document.getElementById('acertos-display').textContent =
-      `${data.acertos} de ${data.total} questões corretas`;
-    document.getElementById('aluno-display').textContent = `Aluno: ${data.nome_aluno}`;
-
-    const notaEl = document.getElementById('nota-display');
-    const nota = data.nota;
-    if (nota >= 7) notaEl.style.background = `linear-gradient(135deg, var(--green), #1ab06a)`;
-    else if (nota >= 5) notaEl.style.background = `linear-gradient(135deg, var(--yellow), #e0b020)`;
-    else notaEl.style.background = `linear-gradient(135deg, var(--red), #c93f3d)`;
-    notaEl.style.webkitBackgroundClip = 'text';
-    notaEl.style.webkitTextFillColor = 'transparent';
-
+  function buildTabela(detalhes) {
     const tbody = document.getElementById('tabela-detalhes');
     tbody.innerHTML = '';
-    Object.entries(data.detalhes).sort((a,b) => parseInt(a[0])-parseInt(b[0])).forEach(([q, d]) => {
+    Object.entries(detalhes).sort((a,b) => parseInt(a[0])-parseInt(b[0])).forEach(([q, d]) => {
       const tr = document.createElement('tr');
+      tr.id = `tr-q${q}`;
       tr.innerHTML = `
         <td><span style="font-family:'JetBrains Mono',monospace;font-weight:600;">Q${q}</span></td>
         <td><span class="badge badge-green">${d.gabarito}</span></td>
@@ -770,20 +730,63 @@
     });
   }
 
-  // ─── Utilidades ───────────────────────────────────────────────
+  function recalcularNota() {
+    // Lê edições manuais do grid de revisão
+    document.querySelectorAll('.resp-edit').forEach(inp => {
+      respostasEditaveis[inp.dataset.q] = inp.value.toUpperCase() || '';
+    });
+
+    const gabConfirmado = getGabaritoConfirmado();
+    const pesos = getPesos();
+
+    let totalPeso = 0, acertosPeso = 0;
+    const novosDetalhes = {};
+
+    Object.entries(gabConfirmado).forEach(([q, respCorreta]) => {
+      const peso = parseFloat(pesos[q] || 1);
+      const respAluno = respostasEditaveis[q] || '';
+      const acertou = respAluno !== '' && respAluno.toUpperCase() === respCorreta.toUpperCase();
+      totalPeso += peso;
+      if (acertou) acertosPeso += peso;
+      novosDetalhes[q] = {
+        gabarito: respCorreta,
+        resposta: respAluno || '—',
+        acertou,
+        peso
+      };
+    });
+
+    const nota = totalPeso > 0 ? Math.round((acertosPeso / totalPeso) * 10 * 100) / 100 : 0;
+    const numAcertos = Object.values(novosDetalhes).filter(d => d.acertou).length;
+
+    // Atualiza nota no topo
+    document.getElementById('nota-display').textContent = nota.toFixed(1);
+    document.getElementById('acertos-display').textContent =
+      `${numAcertos} de ${Object.keys(gabConfirmado).length} questões corretas`;
+
+    const notaEl = document.getElementById('nota-display');
+    if (nota >= 7) notaEl.style.background = `linear-gradient(135deg, var(--green), #1ab06a)`;
+    else if (nota >= 5) notaEl.style.background = `linear-gradient(135deg, var(--yellow), #e0b020)`;
+    else notaEl.style.background = `linear-gradient(135deg, var(--red), #c93f3d)`;
+    notaEl.style.webkitBackgroundClip = 'text';
+    notaEl.style.webkitTextFillColor = 'transparent';
+
+    // Atualiza tabela
+    buildTabela(novosDetalhes);
+  }
+
   function novaCorrecao() {
-    respostasLidas = {};
+    respostasEditaveis = {};
     document.getElementById('prova-file').value = '';
     document.getElementById('prova-preview').style.display = 'none';
     document.getElementById('nome-aluno').value = '';
     document.getElementById('msg3').innerHTML = '';
-    document.getElementById('card-revisao').style.display = 'none';
     goToStep(3);
   }
 
   function resetAll() {
     gabaritoData = {};
-    respostasLidas = {};
+    respostasEditaveis = {};
     document.getElementById('gabarito-file').value = '';
     document.getElementById('gabarito-preview').style.display = 'none';
     document.getElementById('prova-file').value = '';
@@ -791,7 +794,6 @@
     document.getElementById('msg1').innerHTML = '';
     document.getElementById('msg3').innerHTML = '';
     document.getElementById('nome-aluno').value = '';
-    document.getElementById('card-revisao').style.display = 'none';
     goToStep(1);
   }
 </script>
