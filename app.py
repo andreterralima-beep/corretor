@@ -1,5 +1,14 @@
+import os
+import cv2
+import numpy as np
+import json
+from flask import Flask, request, jsonify, render_template
+
+# ESSA LINHA É O QUE RESOLVE O ERRO DO GUNICORN
+app = Flask(__name__)
+
 def detectar_por_materias_preciso(image_file):
-    # ESTRUTURA EXATA DO SEU MODELO (Nome da Matéria : Quantidade de Questões)
+    # ESTRUTURA EXATA DO SEU MODELO
     estrutura_prova = [
         ("Língua Portuguesa", 10), ("Matemática", 10), ("Biologia", 4),
         ("Química", 4),           ("Física", 4),      ("História", 4),
@@ -16,7 +25,7 @@ def detectar_por_materias_preciso(image_file):
     thresh = cv2.adaptiveThreshold(cv2.GaussianBlur(gray, (5, 5), 0), 255, 
                                    cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
 
-    # 1. Captura todos os quadradinhos de resposta da folha
+    # 1. Captura quadradinhos de resposta
     cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     quadradinhos = []
     for c in cnts:
@@ -24,15 +33,13 @@ def detectar_por_materias_preciso(image_file):
         if 18 < w < 48 and 0.7 < (w/h) < 1.3:
             quadradinhos.append((x, y, w, h, c))
 
-    # 2. Ordena de cima para baixo
     quadradinhos.sort(key=lambda q: q[1])
 
-    # 3. Agrupa em linhas de 5 (alternativas A,B,C,D,E)
     questoes_lidas = []
     for i in range(0, len(quadradinhos), 5):
         linha = quadradinhos[i:i+5]
         if len(linha) < 5: continue
-        linha.sort(key=lambda l: l[0]) # Ordena da esquerda para a direita (A -> E)
+        linha.sort(key=lambda l: l[0])
         
         votos = []
         for (lx, ly, lw, lh, l_cnt) in linha:
@@ -41,14 +48,13 @@ def detectar_por_materias_preciso(image_file):
             votos.append(cv2.countNonZero(cv2.bitwise_and(thresh, thresh, mask=mask)))
         
         letras = ['A', 'B', 'C', 'D', 'E']
+        # Verifica se há preenchimento suficiente
         escolha = letras[np.argmax(votos)] if max(votos) > 40 else "?"
         questoes_lidas.append({'x': linha[0][0], 'y': linha[0][1], 'res': escolha})
 
-    # 4. ORDENAÇÃO POR COLUNAS (3 colunas por andar)
-    # Dividimos a folha em 4 "andares" horizontais baseados no Y
+    # Ordenação por colunas (3 por andar)
     questoes_lidas.sort(key=lambda q: (q['y'] // 350, q['x']))
 
-    # 5. DISTRIBUIÇÃO NAS MATÉRIAS (Garante o "pulo" correto de questões)
     resultado_final = {}
     ponteiro = 0
     for nome, qtd in estrutura_prova:
@@ -61,3 +67,39 @@ def detectar_por_materias_preciso(image_file):
                 resultado_final[nome].append("?")
                 
     return resultado_final
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/api/extrair-gabarito", methods=["POST"])
+def api_extrair():
+    try:
+        f = request.files.get('imagem')
+        return jsonify({"gabarito": detectar_por_materias_preciso(f)})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+@app.route("/api/corrigir", methods=["POST"])
+def api_corrigir():
+    try:
+        f = request.files.get('imagem')
+        gab_mestre = json.loads(request.form.get('gabarito'))
+        nome = request.form.get('nome_aluno', 'Estudante')
+        res_aluno = detectar_por_materias_preciso(f)
+
+        acertos, total = 0, 0
+        for mat, q_mestre in gab_mestre.items():
+            q_aluno = res_aluno.get(mat, [])
+            for idx, resp in enumerate(q_mestre):
+                total += 1
+                if idx < len(q_aluno) and str(q_aluno[idx]) == str(resp):
+                    acertos += 1
+        
+        nota = round((acertos / total) * 10, 2) if total > 0 else 0
+        return jsonify({"nome": nome, "nota": nota, "acertos": acertos, "total": total})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
