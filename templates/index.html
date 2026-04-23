@@ -1,157 +1,637 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Corretor Jales Machado</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Garante que o texto dentro dos inputs seja sempre visível */
-        .q-input {
-            color: #000000 !important;
-            background-color: #ffffff !important;
-            font-weight: bold;
-            width: 40px;
-            height: 35px;
-            text-align: center;
-            border-radius: 4px;
-            border: 2px solid #38bdf8;
-            font-size: 1.1rem;
-        }
-        .materia-card {
-            background: #1e293b;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-top: 4px solid #38bdf8;
-        }
-        .grid-questoes {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .q-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: #0f172a;
-            padding: 5px;
-            border-radius: 6px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corretor Jales Machado</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0a0f1e;
+    --surface:  #111827;
+    --card:     #1a2235;
+    --border:   #1e3a5f;
+    --accent:   #00d4ff;
+    --accent2:  #00ff9d;
+    --warn:     #ff6b35;
+    --text:     #e2e8f0;
+    --muted:    #64748b;
+    --green:    #22c55e;
+    --red:      #ef4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #1a2a4a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.5px; }
+  header span { color: var(--accent); }
+  .badge {
+    margin-left: auto;
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.3);
+    color: var(--accent);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* ── Layout ── */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  /* ── Steps ── */
+  .steps {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+  .step-dot {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.4s;
+  }
+  .step-dot.active { background: var(--accent); }
+  .step-dot.done   { background: var(--accent2); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .card-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1.05rem; font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--accent);
+  }
+  .card-title .num {
+    width: 28px; height: 28px;
+    background: rgba(0,212,255,0.15);
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  /* ── Upload area ── */
+  .upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .upload-area:hover, .upload-area.drag-over {
+    border-color: var(--accent);
+    background: rgba(0,212,255,0.04);
+  }
+  .upload-area input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-icon { font-size: 2.5rem; margin-bottom: 10px; }
+  .upload-label { font-size: 0.95rem; color: var(--muted); }
+  .upload-label strong { color: var(--accent); }
+  .preview-img {
+    max-width: 100%; max-height: 200px;
+    border-radius: 8px; margin-top: 12px;
+    border: 1px solid var(--border);
+    display: none;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    width: 100%; padding: 14px 24px;
+    border: none; border-radius: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #0090b3);
+    color: #0a0f1e;
+  }
+  .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-success {
+    background: linear-gradient(135deg, var(--accent2), #00b370);
+    color: #0a0f1e;
+  }
+  .btn-success:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .btn-success:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ── Loading spinner ── */
+  .spinner {
+    display: inline-block; width: 18px; height: 18px;
+    border: 2px solid rgba(0,0,0,0.3);
+    border-top-color: #0a0f1e;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle; margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Debug preview ── */
+  .debug-panel {
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .debug-header {
+    background: rgba(0,212,255,0.08);
+    padding: 10px 16px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .debug-legend {
+    display: flex; gap: 16px; margin-left: auto;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; }
+  .legend-box { width: 12px; height: 12px; border-radius: 2px; }
+  .debug-img-wrap { overflow: auto; max-height: 400px; text-align: center; }
+  .debug-img-wrap img { max-width: 100%; }
+
+  /* ── Matéria cards ── */
+  .materias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .materia-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .materia-nome {
+    font-size: 0.75rem; font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .questoes-wrap {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .q-box {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .q-num { font-size: 0.65rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .q-input {
+    width: 38px; height: 36px;
+    background: var(--bg); border: 2px solid var(--border);
+    border-radius: 6px; color: var(--text);
+    font-size: 1rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+    text-align: center; outline: none;
+    transition: border-color 0.2s;
+  }
+  .q-input:focus { border-color: var(--accent); }
+  .q-input.unknown { border-color: var(--warn); color: var(--warn); }
+
+  /* ── Resultado final ── */
+  .result-card {
+    background: linear-gradient(135deg, #0d1f0d, #0d2a0d);
+    border: 1px solid #1a5c1a;
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+  }
+  .result-name { font-size: 1.1rem; color: var(--muted); margin-bottom: 8px; }
+  .result-name strong { color: var(--text); }
+  .result-nota {
+    font-size: 5rem; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .result-sub { color: var(--muted); margin-top: 8px; font-size: 0.95rem; }
+  .result-detalhes { margin-top: 24px; }
+  .mat-resultado {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .mat-resultado .mat-nome { font-size: 0.85rem; color: var(--muted); }
+  .mat-resultado .mat-score { font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .mat-resultado .q-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+  .q-badge {
+    width: 26px; height: 26px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+  }
+  .q-badge.ok   { background: rgba(34,197,94,0.2); color: var(--green); border: 1px solid rgba(34,197,94,0.4); }
+  .q-badge.err  { background: rgba(239,68,68,0.2);  color: var(--red);   border: 1px solid rgba(239,68,68,0.4);  }
+  .q-badge.miss { background: rgba(255,107,53,0.15); color: var(--warn);  border: 1px solid rgba(255,107,53,0.3);  }
+
+  /* ── Input aluno ── */
+  .input-field {
+    width: 100%; padding: 12px 16px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem;
+    outline: none; transition: border-color 0.2s;
+  }
+  .input-field:focus { border-color: var(--accent); }
+  .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--warn); color: white;
+    padding: 12px 20px; border-radius: 10px;
+    font-weight: 600; font-size: 0.9rem;
+    opacity: 0; transform: translateY(10px);
+    transition: all 0.3s; pointer-events: none;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ── Util ── */
+  .hidden { display: none !important; }
+  .mt-16 { margin-top: 16px; }
+  .section-hint { color: var(--muted); font-size: 0.85rem; margin-bottom: 16px; }
+</style>
 </head>
-<body class="bg-slate-900 text-white p-4">
-    <div class="max-w-5xl mx-auto">
-        <h1 class="text-3xl font-bold text-center text-sky-400 mb-8">📋 Sistema de Correção - Jales Machado</h1>
+<body>
 
-        <div id="passo1" class="bg-slate-800 p-8 rounded-xl shadow-2xl border border-slate-700">
-            <h2 class="text-xl mb-4 font-semibold">1. Foto do Gabarito Mestre (Azul ou Preto)</h2>
-            <input type="file" id="foto_mestre" class="mb-6 block w-full text-slate-400">
-            <button onclick="processarMestre()" id="btn_mestre" class="w-full bg-sky-600 hover:bg-sky-500 p-4 rounded-lg font-black transition-all">
-                ANALISAR GABARITO
-            </button>
-        </div>
+<header>
+  <div class="logo-icon">📋</div>
+  <h1>Corretor <span>Jales Machado</span></h1>
+  <div class="badge">GRATUITO · OpenCV</div>
+</header>
 
-        <div id="passo_revisao" class="hidden mt-8 bg-slate-800 p-8 rounded-xl shadow-2xl">
-            <h2 class="text-2xl text-yellow-400 font-bold mb-6 italic">🔍 Revisão do Gabarito lido pelo OpenCV</h2>
-            <p class="text-slate-400 mb-6">As letras abaixo foram detectadas. Se houver erro ou "?", clique e digite a correta.</p>
-            
-            <div id="container_materias"></div>
+<main>
 
-            <button onclick="confirmarGabarito()" class="w-full bg-green-600 hover:bg-green-500 p-4 rounded-lg font-black mt-6 shadow-lg transition-all">
-                CONFIRMAR GABARITO FINAL
-            </button>
-        </div>
+  <!-- Barra de progresso -->
+  <div class="steps">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+  </div>
 
-        <div id="passo3" class="hidden mt-8 bg-slate-800 p-8 rounded-xl shadow-2xl">
-            <h2 class="text-green-400 font-bold mb-6">2. Corrigir Prova do Aluno</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <input type="text" id="nome_aluno" placeholder="Nome completo do aluno" class="p-3 rounded bg-white text-black font-bold">
-                <input type="file" id="foto_aluno" class="p-2 text-slate-400">
-            </div>
-            <button onclick="corrigirAluno()" id="btn_corrigir" class="w-full bg-green-600 p-4 rounded-lg font-black">
-                CALCULAR NOTA
-            </button>
-            <div id="resultado_final" class="mt-8 p-6 bg-slate-900 rounded-lg text-center hidden"></div>
-        </div>
+  <!-- ═══ PASSO 1: GABARITO MESTRE ═══ -->
+  <div id="passo1" class="card">
+    <div class="card-title">
+      <div class="num">1</div>
+      Foto do Gabarito Mestre
+    </div>
+    <p class="section-hint">
+      Tire uma foto clara da folha de respostas correta (gabarito mestre).
+      Funciona com marcações a caneta azul, preta ou hachuradas.
+    </p>
+
+    <div class="upload-area" id="uploadArea1">
+      <input type="file" id="foto_mestre" accept="image/*" onchange="previewFoto('foto_mestre','prev1')">
+      <div class="upload-icon">📷</div>
+      <div class="upload-label"><strong>Clique ou arraste</strong> a foto aqui</div>
+      <img class="preview-img" id="prev1">
     </div>
 
-    <script>
-        let dadosGabarito = {};
+    <button class="btn btn-primary mt-16" id="btn_mestre" onclick="processarMestre()">
+      ANALISAR GABARITO
+    </button>
+  </div>
 
-        async function processarMestre() {
-            const file = document.getElementById('foto_mestre').files[0];
-            if(!file) return alert("Por favor, tire a foto do gabarito!");
+  <!-- ═══ PASSO 2: REVISÃO ═══ -->
+  <div id="passo2" class="card hidden">
+    <div class="card-title">
+      <div class="num">2</div>
+      Revisar Gabarito Detectado
+    </div>
+    <p class="section-hint">
+      As respostas abaixo foram lidas automaticamente. 
+      Campos com <span style="color:var(--warn)">?</span> não foram detectados — clique e corrija manualmente.
+    </p>
 
-            document.getElementById('btn_mestre').innerText = "IDENTIFICANDO CORES...";
-            
-            const fd = new FormData();
-            fd.append('imagem', file);
+    <!-- Preview debug -->
+    <div class="debug-panel" id="debugPanel" style="display:none">
+      <div class="debug-header">
+        📍 Visualização das caixas detectadas
+        <div class="debug-legend">
+          <div class="legend-item"><div class="legend-box" style="background:#00c800"></div> Marcada</div>
+          <div class="legend-item"><div class="legend-box" style="background:#0050c8"></div> Vazia</div>
+        </div>
+      </div>
+      <div class="debug-img-wrap">
+        <img id="debugImg" src="" alt="debug">
+      </div>
+    </div>
 
-            try {
-                const res = await fetch('/api/extrair-gabarito', { method: 'POST', body: fd });
-                const data = await res.json();
-                dadosGabarito = data.gabarito;
+    <div class="materias-grid mt-16" id="container_materias"></div>
 
-                const container = document.getElementById('container_materias');
-                container.innerHTML = '';
+    <button class="btn btn-success mt-16" onclick="confirmarGabarito()">
+      ✓ CONFIRMAR GABARITO E AVANÇAR
+    </button>
+  </div>
 
-                for (const [materia, questoes] of Object.entries(dadosGabarito)) {
-                    let html = `
-                        <div class="materia-card">
-                            <h3 class="text-sky-300 font-black uppercase text-sm mb-3">${materia}</h3>
-                            <div class="grid-questoes">`;
-                    
-                    questoes.forEach((letra, i) => {
-                        html += `
-                            <div class="q-box">
-                                <span class="text-[10px] text-slate-500 mb-1">Q${i+1}</span>
-                                <input type="text" class="q-input" value="${letra}" 
-                                    oninput="this.value = this.value.toUpperCase()"
-                                    onchange="dadosGabarito['${materia}'][${i}] = this.value">
-                            </div>`;
-                    });
-                    
-                    html += `</div></div>`;
-                    container.innerHTML += html;
-                }
+  <!-- ═══ PASSO 3: CORRIGIR ALUNO ═══ -->
+  <div id="passo3" class="card hidden">
+    <div class="card-title">
+      <div class="num">3</div>
+      Corrigir Prova do Aluno
+    </div>
 
-                document.getElementById('passo1').classList.add('hidden');
-                document.getElementById('passo_revisao').classList.remove('hidden');
-            } catch (e) {
-                alert("Erro no servidor. Verifique o console.");
-            }
-        }
+    <div class="input-group">
+      <input type="text" id="nome_aluno" class="input-field" placeholder="Nome completo do aluno">
+      <div></div>
+    </div>
 
-        function confirmarGabarito() {
-            document.getElementById('passo_revisao').classList.add('hidden');
-            document.getElementById('passo3').classList.remove('hidden');
-        }
+    <div class="upload-area" id="uploadArea3">
+      <input type="file" id="foto_aluno" accept="image/*" onchange="previewFoto('foto_aluno','prev3')">
+      <div class="upload-icon">🎓</div>
+      <div class="upload-label"><strong>Foto da prova</strong> do aluno</div>
+      <img class="preview-img" id="prev3">
+    </div>
 
-        async function corrigirAluno() {
-            const f = document.getElementById('foto_aluno').files[0];
-            const n = document.getElementById('nome_aluno').value;
-            if(!f || !n) return alert("Preencha o nome e selecione a foto da prova!");
+    <button class="btn btn-success mt-16" id="btn_corrigir" onclick="corrigirAluno()">
+      CALCULAR NOTA
+    </button>
 
-            document.getElementById('btn_corrigir').innerText = "CORRIGINDO...";
-            
-            const fd = new FormData();
-            fd.append('imagem', f);
-            fd.append('nome_aluno', n);
-            fd.append('gabarito', JSON.stringify(dadosGabarito));
+    <!-- Debug do aluno -->
+    <div class="debug-panel mt-16" id="debugPanelAluno" style="display:none">
+      <div class="debug-header">
+        📍 Leitura da prova do aluno
+        <div class="debug-legend">
+          <div class="legend-item"><div class="legend-box" style="background:#00c800"></div> Marcada</div>
+          <div class="legend-item"><div class="legend-box" style="background:#0050c8"></div> Vazia</div>
+        </div>
+      </div>
+      <div class="debug-img-wrap">
+        <img id="debugImgAluno" src="" alt="debug aluno">
+      </div>
+    </div>
+  </div>
 
-            const res = await fetch('/api/corrigir', { method: 'POST', body: fd });
-            const d = await res.json();
-            
-            const resDiv = document.getElementById('resultado_final');
-            resDiv.classList.remove('hidden');
-            resDiv.innerHTML = `
-                <h3 class="text-xl text-white">ALUNO: <span class="text-sky-400">${d.nome}</span></h3>
-                <div class="text-5xl font-black text-green-400 my-4">${d.nota}</div>
-                <p class="text-slate-400 text-lg">Acertou ${d.acertos} de ${d.total} questões</p>
-            `;
-            document.getElementById('btn_corrigir').innerText = "CALCULAR NOTA";
-        }
-    </script>
+  <!-- ═══ RESULTADO ═══ -->
+  <div id="resultado" class="hidden"></div>
+
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+let dadosGabarito = {};
+
+/* ── Utils ── */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function setLoading(btnId, loading, label) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  btn.innerHTML = loading
+    ? `<span class="spinner"></span>${label}`
+    : label;
+}
+
+function previewFoto(inputId, imgId) {
+  const file = document.getElementById(inputId).files[0];
+  if (!file) return;
+  const img = document.getElementById(imgId);
+  img.src = URL.createObjectURL(file);
+  img.style.display = 'block';
+}
+
+function updateSteps(active) {
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById(`dot${i}`);
+    dot.className = 'step-dot' + (i < active ? ' done' : i === active ? ' active' : '');
+  }
+}
+
+/* ── Passo 1: Processar gabarito mestre ── */
+async function processarMestre() {
+  const file = document.getElementById('foto_mestre').files[0];
+  if (!file) { toast('Selecione a foto do gabarito!'); return; }
+
+  setLoading('btn_mestre', true, 'ANALISANDO...');
+  const fd = new FormData();
+  fd.append('imagem', file);
+
+  try {
+    const res  = await fetch('/api/extrair-gabarito', { method: 'POST', body: fd });
+    const data = await res.json();
+
+    if (data.erro) { toast('Erro: ' + data.erro); return; }
+
+    dadosGabarito = data.gabarito;
+
+    // Debug image
+    if (data.debug_img) {
+      document.getElementById('debugImg').src = 'data:image/jpeg;base64,' + data.debug_img;
+      document.getElementById('debugPanel').style.display = 'block';
+    }
+
+    // Renderizar matérias
+    const container = document.getElementById('container_materias');
+    container.innerHTML = '';
+
+    for (const [materia, questoes] of Object.entries(dadosGabarito)) {
+      let html = `
+        <div class="materia-card">
+          <div class="materia-nome">${materia}</div>
+          <div class="questoes-wrap">`;
+
+      questoes.forEach((letra, i) => {
+        const cls = letra === '?' ? ' unknown' : '';
+        html += `
+          <div class="q-box">
+            <span class="q-num">Q${i + 1}</span>
+            <input type="text" class="q-input${cls}" maxlength="1"
+              value="${letra}"
+              oninput="this.value=this.value.toUpperCase().replace(/[^ABCDE?]/g,'');
+                       this.className='q-input'+(this.value==='?'?' unknown':'');
+                       dadosGabarito['${materia}'][${i}]=this.value||'?'"
+            >
+          </div>`;
+      });
+
+      html += `</div></div>`;
+      container.innerHTML += html;
+    }
+
+    document.getElementById('passo1').classList.add('hidden');
+    document.getElementById('passo2').classList.remove('hidden');
+    updateSteps(2);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch (e) {
+    toast('Erro de conexão com o servidor.');
+    console.error(e);
+  } finally {
+    setLoading('btn_mestre', false, 'ANALISAR GABARITO');
+  }
+}
+
+/* ── Passo 2: Confirmar gabarito ── */
+function confirmarGabarito() {
+  const incompletos = Object.entries(dadosGabarito)
+    .filter(([_, qs]) => qs.includes('?'))
+    .map(([m]) => m);
+
+  if (incompletos.length > 0) {
+    const ok = confirm(
+      `Atenção: ainda há "${incompletos.join(', ')}" com questões não detectadas (?). Deseja continuar assim mesmo?`
+    );
+    if (!ok) return;
+  }
+
+  document.getElementById('passo2').classList.add('hidden');
+  document.getElementById('passo3').classList.remove('hidden');
+  updateSteps(3);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── Passo 3: Corrigir aluno ── */
+async function corrigirAluno() {
+  const f    = document.getElementById('foto_aluno').files[0];
+  const nome = document.getElementById('nome_aluno').value.trim();
+  if (!f)    { toast('Selecione a foto da prova!'); return; }
+  if (!nome) { toast('Digite o nome do aluno!');   return; }
+
+  setLoading('btn_corrigir', true, 'CORRIGINDO...');
+
+  const fd = new FormData();
+  fd.append('imagem', f);
+  fd.append('nome_aluno', nome);
+  fd.append('gabarito', JSON.stringify(dadosGabarito));
+
+  try {
+    const res = await fetch('/api/corrigir', { method: 'POST', body: fd });
+    const d   = await res.json();
+
+    if (d.erro) { toast('Erro: ' + d.erro); return; }
+
+    // Debug aluno
+    if (d.debug_img) {
+      document.getElementById('debugImgAluno').src = 'data:image/jpeg;base64,' + d.debug_img;
+      document.getElementById('debugPanelAluno').style.display = 'block';
+    }
+
+    // Renderizar resultado
+    let detalheHtml = '';
+    for (const [mat, info] of Object.entries(d.detalhes)) {
+      const badges = info.questoes.map(q => {
+        if (q.aluno === '?') return `<div class="q-badge miss" title="Q${q.questao}: não detectado">?</div>`;
+        if (q.correto)       return `<div class="q-badge ok"   title="Q${q.questao}: ${q.aluno} ✓">${q.aluno}</div>`;
+        return                      `<div class="q-badge err"  title="Q${q.questao}: ${q.aluno} (correto: ${q.gabarito})">${q.aluno}</div>`;
+      }).join('');
+
+      const pct = info.total > 0 ? Math.round((info.acertos / info.total) * 100) : 0;
+      const cor = pct >= 70 ? 'var(--green)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
+
+      detalheHtml += `
+        <div class="mat-resultado">
+          <div>
+            <div class="mat-nome">${mat}</div>
+            <div class="q-badges" style="margin-top:6px">${badges}</div>
+          </div>
+          <div class="mat-score" style="color:${cor};white-space:nowrap;margin-left:12px">
+            ${info.acertos}/${info.total}
+          </div>
+        </div>`;
+    }
+
+    const notaCor = d.nota >= 7 ? 'var(--green)' : d.nota >= 5 ? 'var(--warn)' : 'var(--red)';
+
+    document.getElementById('resultado').innerHTML = `
+      <div class="result-card">
+        <div class="result-name">Resultado de <strong>${d.nome}</strong></div>
+        <div class="result-nota" style="background: linear-gradient(135deg,${notaCor},var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent">
+          ${d.nota.toFixed(1)}
+        </div>
+        <div class="result-sub">${d.acertos} acertos de ${d.total} questões</div>
+        <div class="result-detalhes" style="margin-top:24px;text-align:left">
+          ${detalheHtml}
+        </div>
+        <button class="btn btn-primary" style="margin-top:20px" onclick="novoAluno()">
+          + CORRIGIR OUTRO ALUNO
+        </button>
+      </div>`;
+
+    document.getElementById('resultado').classList.remove('hidden');
+    document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
+
+  } catch (e) {
+    toast('Erro de conexão com o servidor.');
+    console.error(e);
+  } finally {
+    setLoading('btn_corrigir', false, 'CALCULAR NOTA');
+  }
+}
+
+/* ── Reset para novo aluno ── */
+function novoAluno() {
+  document.getElementById('nome_aluno').value = '';
+  document.getElementById('foto_aluno').value = '';
+  document.getElementById('prev3').style.display = 'none';
+  document.getElementById('debugPanelAluno').style.display = 'none';
+  document.getElementById('resultado').classList.add('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── Drag & drop ── */
+['uploadArea1','uploadArea3'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
+  el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+  el.addEventListener('drop', e => {
+    e.preventDefault(); el.classList.remove('drag-over');
+    const input = el.querySelector('input[type=file]');
+    if (e.dataTransfer.files.length) {
+      const dt = new DataTransfer();
+      dt.items.add(e.dataTransfer.files[0]);
+      input.files = dt.files;
+      input.dispatchEvent(new Event('change'));
+    }
+  });
+});
+</script>
 </body>
 </html>
