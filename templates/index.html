@@ -28,10 +28,11 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px}
 .step-dot.done{background:var(--accent2)}
 
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px}
-.card-title{display:flex;align-items:center;gap:10px;font-size:1rem;font-weight:700;margin-bottom:18px;color:var(--accent)}
+.card-title{display:flex;align-items:center;gap:10px;font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--accent)}
 .num{width:26px;height:26px;background:rgba(0,212,255,.15);border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0}
-.hint{color:var(--muted);font-size:.83rem;margin-bottom:14px}
+.hint{color:var(--muted);font-size:.83rem;margin-bottom:14px;line-height:1.5}
 
+/* Upload */
 .upload-area{border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
 .upload-area:hover,.upload-area.drag-over{border-color:var(--accent);background:rgba(0,212,255,.04)}
 .upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
@@ -40,6 +41,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px}
 .upload-label strong{color:var(--accent)}
 .preview-img{max-width:100%;max-height:180px;border-radius:8px;margin-top:10px;border:1px solid var(--border);display:none}
 
+/* Botões */
 .btn{width:100%;padding:13px 20px;border:none;border-radius:9px;font-family:'Space Grotesk',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.4px}
 .btn-primary{background:linear-gradient(135deg,var(--accent),#0090b3);color:#0a0f1e}
 .btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
@@ -47,14 +49,14 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px}
 .btn-success{background:linear-gradient(135deg,var(--accent2),#00b370);color:#0a0f1e}
 .btn-success:hover{filter:brightness(1.1);transform:translateY(-1px)}
 .btn-success:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);width:auto;padding:8px 16px;font-size:.85rem}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);width:auto;padding:8px 16px;font-size:.85rem;border-radius:9px;font-family:'Space Grotesk',sans-serif;font-weight:600;cursor:pointer;transition:all .2s}
 .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
 
 .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:#0a0f1e;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* Debug panel */
-.debug-panel{margin-top:16px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+/* Debug */
+.debug-panel{border:1px solid var(--border);border-radius:10px;overflow:hidden}
 .debug-header{background:rgba(0,212,255,.08);padding:8px 14px;font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:8px}
 .debug-legend{display:flex;gap:14px;margin-left:auto}
 .leg{display:flex;align-items:center;gap:4px;font-size:.72rem}
@@ -62,17 +64,48 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px}
 .debug-img-wrap{overflow:auto;max-height:380px;text-align:center}
 .debug-img-wrap img{max-width:100%}
 
-/* Materia grid */
-.materias-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+/* Grid de matérias */
+.materias-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .materia-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:10px;padding:14px}
 .mat-nome{font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
 .questoes-wrap{display:flex;flex-wrap:wrap;gap:7px}
 .q-box{display:flex;flex-direction:column;align-items:center;gap:2px}
 .q-num{font-size:.62rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
-.q-input{width:36px;height:34px;background:var(--bg);border:2px solid var(--border);border-radius:6px;color:var(--text);font-size:.95rem;font-weight:700;font-family:'JetBrains Mono',monospace;text-align:center;outline:none;transition:border-color .2s}
+
+/* Input de questão */
+.q-input{
+  width:36px;height:34px;
+  background:var(--bg);
+  border:2px solid var(--border);
+  border-radius:6px;
+  color:var(--text);
+  font-size:.95rem;font-weight:700;
+  font-family:'JetBrains Mono',monospace;
+  text-align:center;outline:none;
+  transition:border-color .15s, background .15s;
+}
 .q-input:focus{border-color:var(--accent)}
-.q-input.unknown{border-color:var(--warn)!important;color:var(--warn)}
-.q-input.ok{border-color:var(--green);color:var(--green)}
+.q-input.unknown{border-color:var(--warn)!important;color:var(--warn);background:rgba(255,107,53,.08)}
+.q-input.ok{border-color:rgba(0,255,157,.4);color:var(--accent2)}
+.q-input.edited{border-color:#a78bfa;color:#a78bfa;background:rgba(167,139,250,.08)}
+
+/* Legenda dos campos */
+.field-legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.fleg{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--muted)}
+.fleg-box{width:22px;height:20px;border-radius:4px;border:2px solid;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;font-family:'JetBrains Mono',monospace}
+
+/* Contador de pendências */
+.pending-banner{
+  background:rgba(255,107,53,.12);
+  border:1px solid rgba(255,107,53,.4);
+  border-radius:9px;
+  padding:10px 16px;
+  font-size:.85rem;
+  color:var(--warn);
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:14px;
+}
+.pending-banner.ok{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:var(--green)}
 
 /* Resultado */
 .result-card{background:linear-gradient(135deg,#0d1f0d,#0d2a0d);border:1px solid #1a5c1a;border-radius:14px;padding:28px;text-align:center}
@@ -80,11 +113,12 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px}
 .result-name strong{color:var(--text)}
 .result-nota{font-size:4.5rem;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
 .result-sub{color:var(--muted);margin-top:6px;font-size:.9rem}
+.result-detalhes{margin-top:20px;text-align:left}
 .mat-resultado{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:rgba(0,0,0,.3);border-radius:7px;margin-bottom:7px}
 .mat-resultado .mat-nome2{font-size:.82rem;color:var(--muted)}
 .mat-resultado .mat-score{font-weight:700;font-family:'JetBrains Mono',monospace;white-space:nowrap;margin-left:10px}
 .q-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
-.q-badge{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;font-family:'JetBrains Mono',monospace}
+.q-badge{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;font-family:'JetBrains Mono',monospace;cursor:default}
 .q-badge.ok{background:rgba(34,197,94,.2);color:var(--green);border:1px solid rgba(34,197,94,.4)}
 .q-badge.err{background:rgba(239,68,68,.2);color:var(--red);border:1px solid rgba(239,68,68,.4)}
 .q-badge.miss{background:rgba(255,107,53,.15);color:var(--warn);border:1px solid rgba(255,107,53,.3)}
@@ -100,6 +134,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px}
 .mt-14{margin-top:14px}
 .row-btns{display:flex;gap:10px;margin-top:14px}
 .row-btns .btn{flex:1}
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
 </style>
 </head>
 <body>
@@ -113,9 +148,10 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px}
     <div class="step-dot active" id="dot1"></div>
     <div class="step-dot" id="dot2"></div>
     <div class="step-dot" id="dot3"></div>
+    <div class="step-dot" id="dot4"></div>
   </div>
 
-  <!-- PASSO 1 -->
+  <!-- ═══ PASSO 1: GABARITO MESTRE ═══ -->
   <div id="passo1" class="card">
     <div class="card-title"><div class="num">1</div>Foto do Gabarito Mestre</div>
     <p class="hint">Foto clara da folha de respostas correta. Funciona com marcação azul sólida ou hachurada.</p>
@@ -128,14 +164,19 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px}
     <button class="btn btn-primary mt-14" id="btn_mestre" onclick="processarMestre()">ANALISAR GABARITO</button>
   </div>
 
-  <!-- PASSO 2 -->
+  <!-- ═══ PASSO 2: REVISAR GABARITO ═══ -->
   <div id="passo2" class="card hidden">
-    <div class="card-title"><div class="num">2</div>Revisar Gabarito Detectado</div>
-    <p class="hint">
-      Campos <span style="color:var(--warn)">laranja</span> não foram detectados — edite manualmente.
-      Campos <span style="color:var(--green)">verde</span> foram confirmados.
-      Use A, B, C, D ou E.
-    </p>
+    <div class="card-title"><div class="num">2</div>Revisar Gabarito</div>
+    <p class="hint">Verifique as respostas detectadas e corrija manualmente se necessário.</p>
+
+    <div class="field-legend">
+      <div class="fleg"><div class="fleg-box" style="border-color:rgba(0,255,157,.4);color:var(--accent2)">D</div> Detectado</div>
+      <div class="fleg"><div class="fleg-box" style="border-color:var(--warn);color:var(--warn)">?</div> Não lido — edite</div>
+      <div class="fleg"><div class="fleg-box" style="border-color:#a78bfa;color:#a78bfa">B</div> Editado manualmente</div>
+    </div>
+
+    <div id="pending_mestre" class="pending-banner hidden"></div>
+
     <div class="debug-panel" id="dp1" style="display:none">
       <div class="debug-header">📍 Visualização das caixas detectadas
         <div class="debug-legend">
@@ -145,16 +186,18 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px}
       </div>
       <div class="debug-img-wrap"><img id="di1" src="" alt="debug"></div>
     </div>
-    <div class="materias-grid mt-14" id="container_materias"></div>
+
+    <div class="materias-grid mt-14" id="container_mestre"></div>
+
     <div class="row-btns">
-      <button class="btn btn-outline" onclick="voltarPasso1()">← Voltar</button>
-      <button class="btn btn-success" onclick="confirmarGabarito()">✓ CONFIRMAR E AVANÇAR</button>
+      <button class="btn btn-outline" onclick="ir(1)">← Voltar</button>
+      <button class="btn btn-success" id="btn_confirmar" onclick="confirmarGabarito()">✓ CONFIRMAR GABARITO</button>
     </div>
   </div>
 
-  <!-- PASSO 3 -->
+  <!-- ═══ PASSO 3: FOTO DO ALUNO ═══ -->
   <div id="passo3" class="card hidden">
-    <div class="card-title"><div class="num">3</div>Corrigir Prova do Aluno</div>
+    <div class="card-title"><div class="num">3</div>Foto da Prova do Aluno</div>
     <div class="input-row">
       <input type="text" id="nome_aluno" class="input-field" placeholder="Nome completo do aluno">
       <div></div>
@@ -162,40 +205,62 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px}
     <div class="upload-area" id="ua3">
       <input type="file" id="foto_aluno" accept="image/*" onchange="previewFoto('foto_aluno','pv3')">
       <div class="upload-icon">🎓</div>
-      <div class="upload-label"><strong>Foto da prova</strong> do aluno</div>
+      <div class="upload-label"><strong>Clique ou arraste</strong> a foto da prova aqui</div>
       <img class="preview-img" id="pv3">
     </div>
-    <button class="btn btn-success mt-14" id="btn_corrigir" onclick="corrigirAluno()">CALCULAR NOTA</button>
-
-    <!-- Debug + Edição manual do aluno -->
-    <div id="area_edicao_aluno" class="hidden">
-      <div class="debug-panel mt-14" id="dp3">
-        <div class="debug-header">📍 Leitura da prova do aluno
-          <div class="debug-legend">
-            <div class="leg"><div class="legbox" style="background:#00c800"></div>Marcada</div>
-            <div class="leg"><div class="legbox" style="background:#0050c8"></div>Vazia</div>
-          </div>
-        </div>
-        <div class="debug-img-wrap"><img id="di3" src="" alt="debug aluno"></div>
-      </div>
-      <div class="card mt-14" style="padding:18px">
-        <div class="card-title" style="margin-bottom:10px"><div class="num">✏</div>Ajuste manual das respostas do aluno</div>
-        <p class="hint" style="margin-bottom:14px">Corrija campos <span style="color:var(--warn)">laranja</span> (não detectados) ou qualquer resposta errada antes de calcular a nota.</p>
-        <div class="materias-grid" id="container_aluno"></div>
-        <button class="btn btn-success mt-14" onclick="calcularComAjuste()">✓ CALCULAR NOTA COM ESTAS RESPOSTAS</button>
-      </div>
+    <div class="row-btns">
+      <button class="btn btn-outline" onclick="ir(2)">← Voltar</button>
+      <button class="btn btn-primary mt-14" id="btn_ler_aluno" onclick="lerAluno()">LER RESPOSTAS DO ALUNO</button>
     </div>
   </div>
 
-  <!-- RESULTADO -->
+  <!-- ═══ PASSO 4: EDIÇÃO MANUAL + CALCULAR ═══ -->
+  <div id="passo4" class="card hidden">
+    <div class="card-title"><div class="num">4</div>Confirmar Respostas do Aluno</div>
+    <p class="hint">
+      Confira as respostas lidas automaticamente.
+      Campos <span style="color:var(--warn)">laranja</span> não foram detectados — <strong>clique e digite a letra correta</strong>.
+      Qualquer campo pode ser corrigido antes de calcular.
+    </p>
+
+    <div class="field-legend">
+      <div class="fleg"><div class="fleg-box" style="border-color:rgba(0,255,157,.4);color:var(--accent2)">D</div> Detectado</div>
+      <div class="fleg"><div class="fleg-box" style="border-color:var(--warn);color:var(--warn)">?</div> Não detectado — edite</div>
+      <div class="fleg"><div class="fleg-box" style="border-color:#a78bfa;color:#a78bfa">B</div> Editado manualmente</div>
+    </div>
+
+    <div id="pending_aluno" class="pending-banner hidden"></div>
+
+    <div class="debug-panel" id="dp3">
+      <div class="debug-header">📍 Leitura da prova do aluno
+        <div class="debug-legend">
+          <div class="leg"><div class="legbox" style="background:#00c800"></div>Marcada</div>
+          <div class="leg"><div class="legbox" style="background:#0050c8"></div>Vazia</div>
+        </div>
+      </div>
+      <div class="debug-img-wrap"><img id="di3" src="" alt="debug aluno"></div>
+    </div>
+
+    <div class="materias-grid mt-14" id="container_aluno"></div>
+
+    <div class="row-btns mt-14">
+      <button class="btn btn-outline" onclick="ir(3)">← Nova foto</button>
+      <button class="btn btn-success" id="btn_calcular" onclick="calcularNota()">✓ CALCULAR NOTA</button>
+    </div>
+  </div>
+
+  <!-- ═══ RESULTADO ═══ -->
   <div id="resultado" class="hidden"></div>
+
 </main>
 <div class="toast" id="toast"></div>
 
 <script>
-let dadosGabarito = {};
-let respostasAluno = {};
+// ── Estado global ─────────────────────────────────────────────────────────
+let dadosGabarito  = {};   // gabarito mestre confirmado
+let respostasAluno = {};   // respostas do aluno (editáveis)
 
+// ── Utilitários ──────────────────────────────────────────────────────────
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
@@ -212,47 +277,87 @@ function previewFoto(inputId, imgId) {
   const f = document.getElementById(inputId).files[0];
   if (!f) return;
   const img = document.getElementById(imgId);
-  img.src = URL.createObjectURL(f); img.style.display = 'block';
+  img.src = URL.createObjectURL(f);
+  img.style.display = 'block';
 }
 
-function updateSteps(active) {
-  for (let i = 1; i <= 3; i++) {
-    const d = document.getElementById(`dot${i}`);
-    d.className = 'step-dot' + (i < active ? ' done' : i === active ? ' active' : '');
-  }
+function ir(passo) {
+  [1,2,3,4].forEach(i => {
+    document.getElementById(`passo${i}`).classList.toggle('hidden', i !== passo);
+    const dot = document.getElementById(`dot${i}`);
+    dot.className = 'step-dot' + (i < passo ? ' done' : i === passo ? ' active' : '');
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
-function renderMateriaGrid(containerId, dados, onChange) {
+// ── Render do grid editável ───────────────────────────────────────────────
+function renderGrid(containerId, dados, originals) {
   const c = document.getElementById(containerId);
   c.innerHTML = '';
   for (const [mat, qs] of Object.entries(dados)) {
     let html = `<div class="materia-card"><div class="mat-nome">${mat}</div><div class="questoes-wrap">`;
     qs.forEach((letra, i) => {
-      const cls = letra === '?' ? ' unknown' : (letra ? ' ok' : '');
+      const orig = originals ? originals[mat]?.[i] : letra;
+      const cls = getInputClass(letra, orig);
       html += `<div class="q-box">
         <span class="q-num">Q${i+1}</span>
-        <input type="text" class="q-input${cls}" maxlength="1" value="${letra}"
-          data-mat="${mat}" data-idx="${i}"
-          oninput="onInputLetra(this,'${mat}',${i},'${containerId}')">
+        <input type="text" class="q-input ${cls}" maxlength="1"
+          value="${letra === '?' ? '' : letra}"
+          placeholder="${letra === '?' ? '?' : ''}"
+          data-orig="${orig}"
+          oninput="onLetraInput(this,'${containerId}','${mat}',${i})">
       </div>`;
     });
     html += `</div></div>`;
     c.innerHTML += html;
   }
+  atualizarPendentes(containerId);
 }
 
-function onInputLetra(el, mat, idx, containerId) {
-  const v = el.value.toUpperCase().replace(/[^ABCDE?]/g,'');
+function getInputClass(letra, orig) {
+  if (!letra || letra === '?') return 'unknown';
+  if (orig && orig !== '?' && letra !== orig) return 'edited';
+  return 'ok';
+}
+
+function onLetraInput(el, containerId, mat, idx) {
+  const v = el.value.toUpperCase().replace(/[^ABCDE]/g, '');
   el.value = v;
-  el.className = 'q-input' + (v === '?' || v === '' ? ' unknown' : ' ok');
-  if (containerId === 'container_materias') {
+  const orig = el.dataset.orig;
+  el.className = 'q-input ' + (v === '' ? 'unknown' : v !== orig && orig && orig !== '?' ? 'edited' : 'ok');
+
+  // Atualizar o estado correto
+  if (containerId === 'container_mestre') {
     dadosGabarito[mat][idx] = v || '?';
   } else {
     respostasAluno[mat][idx] = v || '?';
   }
+  atualizarPendentes(containerId);
 }
 
-// ── Passo 1 ──────────────────────────────────────────────────────────────
+function atualizarPendentes(containerId) {
+  const bannerId = containerId === 'container_mestre' ? 'pending_mestre' : 'pending_aluno';
+  const banner = document.getElementById(bannerId);
+  if (!banner) return;
+
+  const dados = containerId === 'container_mestre' ? dadosGabarito : respostasAluno;
+  let count = 0;
+  for (const qs of Object.values(dados)) {
+    count += qs.filter(q => !q || q === '?').length;
+  }
+
+  if (count === 0) {
+    banner.className = 'pending-banner ok';
+    banner.innerHTML = '✓ Todas as questões preenchidas! Pode avançar.';
+    banner.classList.remove('hidden');
+  } else {
+    banner.className = 'pending-banner';
+    banner.innerHTML = `⚠ ${count} questão(ões) com <strong>?</strong> — preencha manualmente antes de continuar.`;
+    banner.classList.remove('hidden');
+  }
+}
+
+// ── Passo 1 → 2: Processar gabarito ──────────────────────────────────────
 async function processarMestre() {
   const f = document.getElementById('foto_mestre').files[0];
   if (!f) { toast('Selecione a foto do gabarito!'); return; }
@@ -262,63 +367,67 @@ async function processarMestre() {
     const res  = await fetch('/api/extrair-gabarito', {method:'POST', body:fd});
     const data = await res.json();
     if (data.erro) { toast('Erro: ' + data.erro); return; }
+
     dadosGabarito = data.gabarito;
+    const originals = JSON.parse(JSON.stringify(data.gabarito)); // cópia dos originais
+
     if (data.debug_img) {
       document.getElementById('di1').src = 'data:image/jpeg;base64,' + data.debug_img;
       document.getElementById('dp1').style.display = 'block';
     }
-    renderMateriaGrid('container_materias', dadosGabarito);
-    document.getElementById('passo1').classList.add('hidden');
-    document.getElementById('passo2').classList.remove('hidden');
-    updateSteps(2); window.scrollTo({top:0, behavior:'smooth'});
+    renderGrid('container_mestre', dadosGabarito, originals);
+    ir(2);
   } catch(e) { toast('Erro de conexão.'); console.error(e); }
   finally { setLoading('btn_mestre', false, 'ANALISAR GABARITO'); }
 }
 
-function voltarPasso1() {
-  document.getElementById('passo2').classList.add('hidden');
-  document.getElementById('passo1').classList.remove('hidden');
-  updateSteps(1);
-}
-
+// ── Passo 2 → 3: Confirmar gabarito ──────────────────────────────────────
 function confirmarGabarito() {
   const inc = Object.entries(dadosGabarito).filter(([_,qs])=>qs.includes('?')).map(([m])=>m);
-  if (inc.length > 0 && !confirm(`Ainda há "?" em: ${inc.join(', ')}. Continuar assim mesmo?`)) return;
-  document.getElementById('passo2').classList.add('hidden');
-  document.getElementById('passo3').classList.remove('hidden');
-  updateSteps(3); window.scrollTo({top:0, behavior:'smooth'});
+  if (inc.length > 0 && !confirm(`Ainda há "?" em: ${inc.join(', ')}.\n\nDeseja continuar assim mesmo?`)) return;
+  ir(3);
 }
 
-// ── Passo 3 ──────────────────────────────────────────────────────────────
-async function corrigirAluno() {
+// ── Passo 3 → 4: Ler prova do aluno ──────────────────────────────────────
+async function lerAluno() {
   const f    = document.getElementById('foto_aluno').files[0];
   const nome = document.getElementById('nome_aluno').value.trim();
   if (!f)    { toast('Selecione a foto da prova!'); return; }
-  if (!nome) { toast('Digite o nome do aluno!'); return; }
-  setLoading('btn_corrigir', true, 'LENDO PROVA...');
-  const fd = new FormData();
-  fd.append('imagem', f);
-  fd.append('nome_aluno', nome);
-  fd.append('gabarito', JSON.stringify(dadosGabarito));
+  if (!nome) { toast('Digite o nome do aluno!');   return; }
+
+  setLoading('btn_ler_aluno', true, 'LENDO...');
+  const fd = new FormData(); fd.append('imagem', f);
   try {
     const res  = await fetch('/api/extrair-gabarito', {method:'POST', body:fd});
     const data = await res.json();
     if (data.erro) { toast('Erro: ' + data.erro); return; }
+
     respostasAluno = data.gabarito;
+    const originals = JSON.parse(JSON.stringify(data.gabarito));
+
     if (data.debug_img) {
       document.getElementById('di3').src = 'data:image/jpeg;base64,' + data.debug_img;
     }
-    renderMateriaGrid('container_aluno', respostasAluno);
-    document.getElementById('area_edicao_aluno').classList.remove('hidden');
-    document.getElementById('area_edicao_aluno').scrollIntoView({behavior:'smooth'});
+    renderGrid('container_aluno', respostasAluno, originals);
+    ir(4);
   } catch(e) { toast('Erro de conexão.'); console.error(e); }
-  finally { setLoading('btn_corrigir', false, 'CALCULAR NOTA'); }
+  finally { setLoading('btn_ler_aluno', false, 'LER RESPOSTAS DO ALUNO'); }
 }
 
-function calcularComAjuste() {
+// ── Passo 4: Calcular nota ────────────────────────────────────────────────
+function calcularNota() {
   const nome = document.getElementById('nome_aluno').value.trim() || 'Estudante';
+
+  // Verificar se há pendências
+  let pendencias = 0;
+  for (const qs of Object.values(respostasAluno)) {
+    pendencias += qs.filter(q => !q || q === '?').length;
+  }
+  if (pendencias > 0 && !confirm(`Ainda há ${pendencias} questão(ões) não preenchida(s).\nElas serão contadas como erradas. Continuar?`)) return;
+
   let acertos = 0, total = 0;
   const detalhes = {};
+
   for (const [mat, q_mestre] of Object.entries(dadosGabarito)) {
     const q_aluno = respostasAluno[mat] || [];
     let mat_ac = 0;
@@ -326,27 +435,31 @@ function calcularComAjuste() {
     q_mestre.forEach((gab, idx) => {
       total++;
       const aluno = (q_aluno[idx] || '?').toString();
-      const ok = aluno === gab.toString();
+      const ok = aluno !== '?' && aluno === gab.toString();
       if (ok) { acertos++; mat_ac++; }
       questoes.push({questao:idx+1, gabarito:gab, aluno, correto:ok});
     });
     detalhes[mat] = {acertos:mat_ac, total:q_mestre.length, questoes};
   }
-  const nota = total > 0 ? (acertos/total*10).toFixed(2) : '0.00';
+
+  const nota = total > 0 ? (acertos / total * 10).toFixed(2) : '0.00';
   exibirResultado({nome, nota, acertos, total, detalhes});
 }
 
+// ── Exibir resultado ──────────────────────────────────────────────────────
 function exibirResultado(d) {
   const notaNum = parseFloat(d.nota);
   const notaCor = notaNum >= 7 ? 'var(--green)' : notaNum >= 5 ? 'var(--warn)' : 'var(--red)';
+
   let detalheHtml = '';
   for (const [mat, info] of Object.entries(d.detalhes)) {
     const badges = info.questoes.map(q => {
-      if (q.aluno === '?') return `<div class="q-badge miss" title="Q${q.questao}: não detectado">?</div>`;
-      if (q.correto)       return `<div class="q-badge ok" title="Q${q.questao}: ${q.aluno} ✓">${q.aluno}</div>`;
-      return `<div class="q-badge err" title="Q${q.questao}: ${q.aluno} (gabarito: ${q.gabarito})">${q.aluno}</div>`;
+      const title = `Q${q.questao}: aluno=${q.aluno} | gabarito=${q.gabarito}`;
+      if (q.aluno === '?') return `<div class="q-badge miss" title="${title}">?</div>`;
+      if (q.correto)       return `<div class="q-badge ok"  title="${title}">${q.aluno}</div>`;
+      return                      `<div class="q-badge err" title="${title}">${q.aluno}</div>`;
     }).join('');
-    const pct = info.total > 0 ? Math.round(info.acertos/info.total*100) : 0;
+    const pct = info.total > 0 ? Math.round(info.acertos / info.total * 100) : 0;
     const cor = pct >= 70 ? 'var(--green)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
     detalheHtml += `
       <div class="mat-resultado">
@@ -357,29 +470,38 @@ function exibirResultado(d) {
         <div class="mat-score" style="color:${cor}">${info.acertos}/${info.total}</div>
       </div>`;
   }
+
   const el = document.getElementById('resultado');
   el.innerHTML = `
     <div class="result-card">
       <div class="result-name">Resultado de <strong>${d.nome}</strong></div>
-      <div class="result-nota" style="color:${notaCor}">${parseFloat(d.nota).toFixed(1)}</div>
+      <div class="result-nota" style="color:${notaCor}">${notaNum.toFixed(1)}</div>
       <div class="result-sub">${d.acertos} acertos de ${d.total} questões</div>
-      <div style="margin-top:22px;text-align:left">${detalheHtml}</div>
-      <button class="btn btn-primary" style="margin-top:18px" onclick="novoAluno()">+ CORRIGIR OUTRO ALUNO</button>
+      <div class="result-detalhes">${detalheHtml}</div>
+      <div class="row-btns" style="margin-top:18px">
+        <button class="btn btn-outline" onclick="voltarEditar()">✏ Corrigir respostas</button>
+        <button class="btn btn-success" onclick="novoAluno()">+ Novo aluno</button>
+      </div>
     </div>`;
   el.classList.remove('hidden');
   el.scrollIntoView({behavior:'smooth'});
 }
 
+function voltarEditar() {
+  document.getElementById('resultado').classList.add('hidden');
+  ir(4);
+}
+
 function novoAluno() {
+  document.getElementById('resultado').classList.add('hidden');
   document.getElementById('nome_aluno').value = '';
   document.getElementById('foto_aluno').value = '';
   document.getElementById('pv3').style.display = 'none';
-  document.getElementById('area_edicao_aluno').classList.add('hidden');
-  document.getElementById('resultado').classList.add('hidden');
-  window.scrollTo({top:0, behavior:'smooth'});
+  respostasAluno = {};
+  ir(3);
 }
 
-// Drag & drop
+// ── Drag & drop ───────────────────────────────────────────────────────────
 ['ua1','ua3'].forEach(id => {
   const el = document.getElementById(id);
   el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
@@ -388,8 +510,10 @@ function novoAluno() {
     e.preventDefault(); el.classList.remove('drag-over');
     const inp = el.querySelector('input[type=file]');
     if (e.dataTransfer.files.length) {
-      const dt = new DataTransfer(); dt.items.add(e.dataTransfer.files[0]);
-      inp.files = dt.files; inp.dispatchEvent(new Event('change'));
+      const dt = new DataTransfer();
+      dt.items.add(e.dataTransfer.files[0]);
+      inp.files = dt.files;
+      inp.dispatchEvent(new Event('change'));
     }
   });
 });
