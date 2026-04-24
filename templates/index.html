@@ -3,40 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Corretor Inteligente</title>
+<title>Corretor de Prova</title>
 
 <style>
-body{
-  background:#0f172a;
-  color:#e2e8f0;
-  font-family:Arial;
-  text-align:center;
-  padding:20px;
-}
-.card{
-  background:#1e293b;
-  padding:20px;
-  border-radius:10px;
-  margin-bottom:20px;
-}
-button{
-  padding:12px;
-  margin-top:10px;
-  width:100%;
-  border:none;
-  border-radius:8px;
-  font-weight:bold;
-  cursor:pointer;
-}
-.btn{background:#00d4ff;color:#000;}
-input{width:100%;padding:10px;margin-top:10px}
-video, canvas, img{
-  width:100%;
-  max-width:400px;
-  margin-top:10px;
-  border-radius:10px;
-}
-label{display:block;margin-top:10px}
+body{background:#0f172a;color:#fff;font-family:Arial;text-align:center}
+.card{background:#1e293b;padding:20px;margin:15px;border-radius:10px}
+button{padding:10px;width:100%;margin-top:10px}
+video,img{width:100%;max-width:400px;margin-top:10px}
 </style>
 </head>
 
@@ -44,132 +17,92 @@ label{display:block;margin-top:10px}
 
 <h2>📋 Corretor de Prova</h2>
 
-<!-- ========================= -->
-<!-- 📸 CAMERA -->
-<!-- ========================= -->
+<!-- GABARITO -->
 <div class="card">
-  <h3>📷 Câmera</h3>
-  <video id="video" autoplay playsinline></video>
-  <button class="btn" onclick="tirarFoto()">📸 Tirar Foto</button>
-  <canvas id="canvas" style="display:none;"></canvas>
-  <img id="preview">
+<h3>📄 Gabarito</h3>
+<input type="file" id="foto_mestre">
+<button onclick="enviarGabarito()">Ler Gabarito</button>
 </div>
 
-<!-- ========================= -->
-<!-- ⚙️ CALIBRAÇÃO -->
-<!-- ========================= -->
+<!-- CAMERA -->
 <div class="card">
-  <h3>⚙️ Calibração</h3>
+<h3>📷 Aluno</h3>
+<video id="video" autoplay playsinline></video>
+<button onclick="tirarFoto()">📸 Foto</button>
+<canvas id="canvas" style="display:none"></canvas>
+<img id="preview">
+<button onclick="enviarAluno()">Ler Aluno</button>
+</div>
 
-  <label>Ruído (blur): <span id="v_blur">5</span></label>
-  <input type="range" min="1" max="11" step="2" value="5" id="blur">
+<!-- CALIBRAÇÃO -->
+<div class="card">
+<h3>⚙️ Calibração</h3>
 
-  <label>Threshold bloco: <span id="v_tb">15</span></label>
-  <input type="range" min="3" max="35" step="2" value="15" id="thresh_block">
-
-  <label>Contraste (C): <span id="v_tc">5</span></label>
-  <input type="range" min="1" max="15" value="5" id="thresh_C">
-
-  <label>Sensibilidade marca: <span id="v_fill">0.25</span></label>
-  <input type="range" min="0.10" max="0.50" step="0.01" value="0.25" id="fill_min">
+Blur <input type="range" id="blur" min="1" max="11" step="2" value="5"><br>
+Thresh Block <input type="range" id="thresh_block" min="3" max="35" step="2" value="15"><br>
+Thresh C <input type="range" id="thresh_C" min="1" max="15" value="5"><br>
+Fill <input type="range" id="fill_min" min="0.1" max="0.5" step="0.01" value="0.25">
 
 </div>
 
-<!-- ========================= -->
-<!-- 🎯 AÇÕES -->
-<!-- ========================= -->
-<div class="card">
-  <button class="btn" onclick="ler()">🔍 LER GABARITO</button>
-</div>
-
-<!-- ========================= -->
 <!-- RESULTADO -->
-<!-- ========================= -->
 <div class="card">
-  <h3>📊 Resultado</h3>
-  <pre id="saida"></pre>
-  <img id="debug">
+<pre id="saida"></pre>
+<img id="debug">
 </div>
 
 <script>
-// ==============================
-// 📸 ATIVAR CÂMERA
-// ==============================
 const video = document.getElementById('video');
 
 navigator.mediaDevices.getUserMedia({
-  video: { facingMode: "environment" }
-}).then(stream => {
-  video.srcObject = stream;
-});
+  video:{facingMode:"environment"}
+}).then(stream=>video.srcObject=stream);
 
-// ==============================
-// 📸 CAPTURA FOTO
-// ==============================
+// FOTO
 function tirarFoto(){
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
+  const canvas=document.getElementById('canvas');
+  const ctx=canvas.getContext('2d');
 
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
 
-  ctx.drawImage(video, 0, 0);
+  ctx.drawImage(video,0,0);
 
-  const img = document.getElementById('preview');
-  img.src = canvas.toDataURL('image/jpeg');
+  document.getElementById('preview').src=canvas.toDataURL();
 }
 
-// ==============================
-// 🎛️ ATUALIZA LABELS
-// ==============================
-["blur","thresh_block","thresh_C","fill_min"].forEach(id=>{
-  const el = document.getElementById(id);
-  const label = document.getElementById("v_"+id.split("_")[0]);
+// ENVIO
+async function enviar(blob){
+  const fd=new FormData();
 
-  el.oninput = () => label.textContent = el.value;
-});
+  fd.append("imagem",blob);
 
-// ==============================
-// 🚀 ENVIO PARA BACKEND
-// ==============================
-async function ler(){
+  fd.append("blur",document.getElementById("blur").value);
+  fd.append("thresh_block",document.getElementById("thresh_block").value);
+  fd.append("thresh_C",document.getElementById("thresh_C").value);
+  fd.append("fill_min",document.getElementById("fill_min").value);
 
-  const canvas = document.getElementById('canvas');
+  const res=await fetch("/api/extrair-gabarito",{method:"POST",body:fd});
+  const data=await res.json();
 
-  if (!canvas.width){
-    alert("Tire a foto primeiro!");
-    return;
-  }
+  document.getElementById("saida").textContent=
+    JSON.stringify(data.gabarito,null,2);
 
-  canvas.toBlob(async (blob)=>{
+  document.getElementById("debug").src=
+    "data:image/jpeg;base64,"+data.debug_img;
+}
 
-    const fd = new FormData();
+// GABARITO
+function enviarGabarito(){
+  const f=document.getElementById("foto_mestre").files[0];
+  if(!f){alert("Selecione o gabarito");return;}
+  enviar(f);
+}
 
-    fd.append("imagem", blob, "foto.jpg");
-
-    // 🔥 CALIBRAÇÃO
-    fd.append("blur", document.getElementById("blur").value);
-    fd.append("thresh_block", document.getElementById("thresh_block").value);
-    fd.append("thresh_C", document.getElementById("thresh_C").value);
-    fd.append("fill_min", document.getElementById("fill_min").value);
-
-    const res = await fetch("/api/extrair-gabarito", {
-      method:"POST",
-      body:fd
-    });
-
-    const data = await res.json();
-
-    document.getElementById("saida").textContent =
-      JSON.stringify(data.gabarito, null, 2);
-
-    if (data.debug_img){
-      document.getElementById("debug").src =
-        "data:image/jpeg;base64," + data.debug_img;
-    }
-
-  }, "image/jpeg");
-
+// ALUNO
+function enviarAluno(){
+  const canvas=document.getElementById("canvas");
+  canvas.toBlob(blob=>enviar(blob),"image/jpeg");
 }
 </script>
 
