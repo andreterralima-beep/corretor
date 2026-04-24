@@ -6,629 +6,390 @@
 <title>Corretor Jales Machado</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:       #0a0f1e;
-    --surface:  #111827;
-    --card:     #1a2235;
-    --border:   #1e3a5f;
-    --accent:   #00d4ff;
-    --accent2:  #00ff9d;
-    --warn:     #ff6b35;
-    --text:     #e2e8f0;
-    --muted:    #64748b;
-    --green:    #22c55e;
-    --red:      #ef4444;
-  }
+:root {
+  --bg:#0a0f1e; --surface:#111827; --card:#1a2235; --border:#1e3a5f;
+  --accent:#00d4ff; --accent2:#00ff9d; --warn:#ff6b35;
+  --text:#e2e8f0; --muted:#64748b; --green:#22c55e; --red:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+header{background:linear-gradient(135deg,#0d1b2a,#1a2a4a);border-bottom:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;gap:12px}
+.logo{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+header h1{font-size:1.25rem;font-weight:700}
+header span{color:var(--accent)}
+.badge{margin-left:auto;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);color:var(--accent);padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:1px}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Space Grotesk', sans-serif;
-    min-height: 100vh;
-  }
+main{max-width:1100px;margin:0 auto;padding:28px 20px}
 
-  /* ── Header ── */
-  header {
-    background: linear-gradient(135deg, #0d1b2a 0%, #1a2a4a 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 20px 32px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .logo-icon {
-    width: 44px; height: 44px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-  }
-  header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.5px; }
-  header span { color: var(--accent); }
-  .badge {
-    margin-left: auto;
-    background: rgba(0,212,255,0.1);
-    border: 1px solid rgba(0,212,255,0.3);
-    color: var(--accent);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 1px;
-  }
+.steps{display:flex;gap:6px;margin-bottom:28px}
+.step-dot{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .4s}
+.step-dot.active{background:var(--accent)}
+.step-dot.done{background:var(--accent2)}
 
-  /* ── Layout ── */
-  main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 32px 24px;
-  }
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px}
+.card-title{display:flex;align-items:center;gap:10px;font-size:1rem;font-weight:700;margin-bottom:18px;color:var(--accent)}
+.num{width:26px;height:26px;background:rgba(0,212,255,.15);border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.hint{color:var(--muted);font-size:.83rem;margin-bottom:14px}
 
-  /* ── Steps ── */
-  .steps {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 32px;
-  }
-  .step-dot {
-    flex: 1;
-    height: 4px;
-    border-radius: 2px;
-    background: var(--border);
-    transition: background 0.4s;
-  }
-  .step-dot.active { background: var(--accent); }
-  .step-dot.done   { background: var(--accent2); }
+.upload-area{border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.upload-area:hover,.upload-area.drag-over{border-color:var(--accent);background:rgba(0,212,255,.04)}
+.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:2.2rem;margin-bottom:8px}
+.upload-label{font-size:.9rem;color:var(--muted)}
+.upload-label strong{color:var(--accent)}
+.preview-img{max-width:100%;max-height:180px;border-radius:8px;margin-top:10px;border:1px solid var(--border);display:none}
 
-  /* ── Cards ── */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px;
-    margin-bottom: 24px;
-  }
-  .card-title {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 1.05rem; font-weight: 700;
-    margin-bottom: 20px;
-    color: var(--accent);
-  }
-  .card-title .num {
-    width: 28px; height: 28px;
-    background: rgba(0,212,255,0.15);
-    border: 1px solid var(--accent);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.8rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;
-    flex-shrink: 0;
-  }
+.btn{width:100%;padding:13px 20px;border:none;border-radius:9px;font-family:'Space Grotesk',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.4px}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#0090b3);color:#0a0f1e}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-success{background:linear-gradient(135deg,var(--accent2),#00b370);color:#0a0f1e}
+.btn-success:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-success:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);width:auto;padding:8px 16px;font-size:.85rem}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
 
-  /* ── Upload area ── */
-  .upload-area {
-    border: 2px dashed var(--border);
-    border-radius: 12px;
-    padding: 32px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-  }
-  .upload-area:hover, .upload-area.drag-over {
-    border-color: var(--accent);
-    background: rgba(0,212,255,0.04);
-  }
-  .upload-area input[type=file] {
-    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-  }
-  .upload-icon { font-size: 2.5rem; margin-bottom: 10px; }
-  .upload-label { font-size: 0.95rem; color: var(--muted); }
-  .upload-label strong { color: var(--accent); }
-  .preview-img {
-    max-width: 100%; max-height: 200px;
-    border-radius: 8px; margin-top: 12px;
-    border: 1px solid var(--border);
-    display: none;
-  }
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:#0a0f1e;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-  /* ── Buttons ── */
-  .btn {
-    width: 100%; padding: 14px 24px;
-    border: none; border-radius: 10px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1rem; font-weight: 700;
-    cursor: pointer; transition: all 0.2s;
-    letter-spacing: 0.5px;
-  }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent), #0090b3);
-    color: #0a0f1e;
-  }
-  .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-  .btn-success {
-    background: linear-gradient(135deg, var(--accent2), #00b370);
-    color: #0a0f1e;
-  }
-  .btn-success:hover { filter: brightness(1.1); transform: translateY(-1px); }
-  .btn-success:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+/* Debug panel */
+.debug-panel{margin-top:16px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.debug-header{background:rgba(0,212,255,.08);padding:8px 14px;font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:8px}
+.debug-legend{display:flex;gap:14px;margin-left:auto}
+.leg{display:flex;align-items:center;gap:4px;font-size:.72rem}
+.legbox{width:11px;height:11px;border-radius:2px}
+.debug-img-wrap{overflow:auto;max-height:380px;text-align:center}
+.debug-img-wrap img{max-width:100%}
 
-  /* ── Loading spinner ── */
-  .spinner {
-    display: inline-block; width: 18px; height: 18px;
-    border: 2px solid rgba(0,0,0,0.3);
-    border-top-color: #0a0f1e;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    vertical-align: middle; margin-right: 8px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* Materia grid */
+.materias-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.materia-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:10px;padding:14px}
+.mat-nome{font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.questoes-wrap{display:flex;flex-wrap:wrap;gap:7px}
+.q-box{display:flex;flex-direction:column;align-items:center;gap:2px}
+.q-num{font-size:.62rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.q-input{width:36px;height:34px;background:var(--bg);border:2px solid var(--border);border-radius:6px;color:var(--text);font-size:.95rem;font-weight:700;font-family:'JetBrains Mono',monospace;text-align:center;outline:none;transition:border-color .2s}
+.q-input:focus{border-color:var(--accent)}
+.q-input.unknown{border-color:var(--warn)!important;color:var(--warn)}
+.q-input.ok{border-color:var(--green);color:var(--green)}
 
-  /* ── Debug preview ── */
-  .debug-panel {
-    margin-top: 20px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .debug-header {
-    background: rgba(0,212,255,0.08);
-    padding: 10px 16px;
-    font-size: 0.8rem;
-    color: var(--muted);
-    display: flex; align-items: center; gap: 8px;
-  }
-  .debug-legend {
-    display: flex; gap: 16px; margin-left: auto;
-  }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; }
-  .legend-box { width: 12px; height: 12px; border-radius: 2px; }
-  .debug-img-wrap { overflow: auto; max-height: 400px; text-align: center; }
-  .debug-img-wrap img { max-width: 100%; }
+/* Resultado */
+.result-card{background:linear-gradient(135deg,#0d1f0d,#0d2a0d);border:1px solid #1a5c1a;border-radius:14px;padding:28px;text-align:center}
+.result-name{font-size:1rem;color:var(--muted);margin-bottom:6px}
+.result-name strong{color:var(--text)}
+.result-nota{font-size:4.5rem;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
+.result-sub{color:var(--muted);margin-top:6px;font-size:.9rem}
+.mat-resultado{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:rgba(0,0,0,.3);border-radius:7px;margin-bottom:7px}
+.mat-resultado .mat-nome2{font-size:.82rem;color:var(--muted)}
+.mat-resultado .mat-score{font-weight:700;font-family:'JetBrains Mono',monospace;white-space:nowrap;margin-left:10px}
+.q-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.q-badge{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;font-family:'JetBrains Mono',monospace}
+.q-badge.ok{background:rgba(34,197,94,.2);color:var(--green);border:1px solid rgba(34,197,94,.4)}
+.q-badge.err{background:rgba(239,68,68,.2);color:var(--red);border:1px solid rgba(239,68,68,.4)}
+.q-badge.miss{background:rgba(255,107,53,.15);color:var(--warn);border:1px solid rgba(255,107,53,.3)}
 
-  /* ── Matéria cards ── */
-  .materias-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-  }
-  .materia-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-top: 3px solid var(--accent);
-    border-radius: 12px;
-    padding: 16px;
-  }
-  .materia-nome {
-    font-size: 0.75rem; font-weight: 700;
-    color: var(--accent);
-    text-transform: uppercase; letter-spacing: 1px;
-    margin-bottom: 12px;
-  }
-  .questoes-wrap {
-    display: flex; flex-wrap: wrap; gap: 8px;
-  }
-  .q-box {
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-  }
-  .q-num { font-size: 0.65rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-  .q-input {
-    width: 38px; height: 36px;
-    background: var(--bg); border: 2px solid var(--border);
-    border-radius: 6px; color: var(--text);
-    font-size: 1rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;
-    text-align: center; outline: none;
-    transition: border-color 0.2s;
-  }
-  .q-input:focus { border-color: var(--accent); }
-  .q-input.unknown { border-color: var(--warn); color: var(--warn); }
+.input-field{width:100%;padding:11px 14px;background:var(--bg);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s}
+.input-field:focus{border-color:var(--accent)}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 
-  /* ── Resultado final ── */
-  .result-card {
-    background: linear-gradient(135deg, #0d1f0d, #0d2a0d);
-    border: 1px solid #1a5c1a;
-    border-radius: 16px;
-    padding: 32px;
-    text-align: center;
-  }
-  .result-name { font-size: 1.1rem; color: var(--muted); margin-bottom: 8px; }
-  .result-name strong { color: var(--text); }
-  .result-nota {
-    font-size: 5rem; font-weight: 700;
-    font-family: 'JetBrains Mono', monospace;
-    background: linear-gradient(135deg, var(--accent2), var(--accent));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    line-height: 1;
-  }
-  .result-sub { color: var(--muted); margin-top: 8px; font-size: 0.95rem; }
-  .result-detalhes { margin-top: 24px; }
-  .mat-resultado {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 14px;
-    background: rgba(0,0,0,0.3);
-    border-radius: 8px;
-    margin-bottom: 8px;
-  }
-  .mat-resultado .mat-nome { font-size: 0.85rem; color: var(--muted); }
-  .mat-resultado .mat-score { font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-  .mat-resultado .q-badges { display: flex; gap: 4px; flex-wrap: wrap; }
-  .q-badge {
-    width: 26px; height: 26px;
-    border-radius: 4px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.7rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;
-  }
-  .q-badge.ok   { background: rgba(34,197,94,0.2); color: var(--green); border: 1px solid rgba(34,197,94,0.4); }
-  .q-badge.err  { background: rgba(239,68,68,0.2);  color: var(--red);   border: 1px solid rgba(239,68,68,0.4);  }
-  .q-badge.miss { background: rgba(255,107,53,0.15); color: var(--warn);  border: 1px solid rgba(255,107,53,0.3);  }
+.toast{position:fixed;bottom:20px;right:20px;background:var(--warn);color:#fff;padding:10px 18px;border-radius:9px;font-weight:600;font-size:.88rem;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1;transform:translateY(0)}
 
-  /* ── Input aluno ── */
-  .input-field {
-    width: 100%; padding: 12px 16px;
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: 10px; color: var(--text);
-    font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem;
-    outline: none; transition: border-color 0.2s;
-  }
-  .input-field:focus { border-color: var(--accent); }
-  .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-
-  /* ── Toast ── */
-  .toast {
-    position: fixed; bottom: 24px; right: 24px;
-    background: var(--warn); color: white;
-    padding: 12px 20px; border-radius: 10px;
-    font-weight: 600; font-size: 0.9rem;
-    opacity: 0; transform: translateY(10px);
-    transition: all 0.3s; pointer-events: none;
-    z-index: 999;
-  }
-  .toast.show { opacity: 1; transform: translateY(0); }
-
-  /* ── Util ── */
-  .hidden { display: none !important; }
-  .mt-16 { margin-top: 16px; }
-  .section-hint { color: var(--muted); font-size: 0.85rem; margin-bottom: 16px; }
+.hidden{display:none!important}
+.mt-14{margin-top:14px}
+.row-btns{display:flex;gap:10px;margin-top:14px}
+.row-btns .btn{flex:1}
 </style>
 </head>
 <body>
-
 <header>
-  <div class="logo-icon">📋</div>
+  <div class="logo">📋</div>
   <h1>Corretor <span>Jales Machado</span></h1>
   <div class="badge">GRATUITO · OpenCV</div>
 </header>
-
 <main>
-
-  <!-- Barra de progresso -->
   <div class="steps">
     <div class="step-dot active" id="dot1"></div>
     <div class="step-dot" id="dot2"></div>
     <div class="step-dot" id="dot3"></div>
   </div>
 
-  <!-- ═══ PASSO 1: GABARITO MESTRE ═══ -->
+  <!-- PASSO 1 -->
   <div id="passo1" class="card">
-    <div class="card-title">
-      <div class="num">1</div>
-      Foto do Gabarito Mestre
-    </div>
-    <p class="section-hint">
-      Tire uma foto clara da folha de respostas correta (gabarito mestre).
-      Funciona com marcações a caneta azul, preta ou hachuradas.
-    </p>
-
-    <div class="upload-area" id="uploadArea1">
-      <input type="file" id="foto_mestre" accept="image/*" onchange="previewFoto('foto_mestre','prev1')">
+    <div class="card-title"><div class="num">1</div>Foto do Gabarito Mestre</div>
+    <p class="hint">Foto clara da folha de respostas correta. Funciona com marcação azul sólida ou hachurada.</p>
+    <div class="upload-area" id="ua1">
+      <input type="file" id="foto_mestre" accept="image/*" onchange="previewFoto('foto_mestre','pv1')">
       <div class="upload-icon">📷</div>
       <div class="upload-label"><strong>Clique ou arraste</strong> a foto aqui</div>
-      <img class="preview-img" id="prev1">
+      <img class="preview-img" id="pv1">
     </div>
-
-    <button class="btn btn-primary mt-16" id="btn_mestre" onclick="processarMestre()">
-      ANALISAR GABARITO
-    </button>
+    <button class="btn btn-primary mt-14" id="btn_mestre" onclick="processarMestre()">ANALISAR GABARITO</button>
   </div>
 
-  <!-- ═══ PASSO 2: REVISÃO ═══ -->
+  <!-- PASSO 2 -->
   <div id="passo2" class="card hidden">
-    <div class="card-title">
-      <div class="num">2</div>
-      Revisar Gabarito Detectado
-    </div>
-    <p class="section-hint">
-      As respostas abaixo foram lidas automaticamente. 
-      Campos com <span style="color:var(--warn)">?</span> não foram detectados — clique e corrija manualmente.
+    <div class="card-title"><div class="num">2</div>Revisar Gabarito Detectado</div>
+    <p class="hint">
+      Campos <span style="color:var(--warn)">laranja</span> não foram detectados — edite manualmente.
+      Campos <span style="color:var(--green)">verde</span> foram confirmados.
+      Use A, B, C, D ou E.
     </p>
-
-    <!-- Preview debug -->
-    <div class="debug-panel" id="debugPanel" style="display:none">
-      <div class="debug-header">
-        📍 Visualização das caixas detectadas
+    <div class="debug-panel" id="dp1" style="display:none">
+      <div class="debug-header">📍 Visualização das caixas detectadas
         <div class="debug-legend">
-          <div class="legend-item"><div class="legend-box" style="background:#00c800"></div> Marcada</div>
-          <div class="legend-item"><div class="legend-box" style="background:#0050c8"></div> Vazia</div>
+          <div class="leg"><div class="legbox" style="background:#00c800"></div>Marcada</div>
+          <div class="leg"><div class="legbox" style="background:#0050c8"></div>Vazia</div>
         </div>
       </div>
-      <div class="debug-img-wrap">
-        <img id="debugImg" src="" alt="debug">
-      </div>
+      <div class="debug-img-wrap"><img id="di1" src="" alt="debug"></div>
     </div>
-
-    <div class="materias-grid mt-16" id="container_materias"></div>
-
-    <button class="btn btn-success mt-16" onclick="confirmarGabarito()">
-      ✓ CONFIRMAR GABARITO E AVANÇAR
-    </button>
+    <div class="materias-grid mt-14" id="container_materias"></div>
+    <div class="row-btns">
+      <button class="btn btn-outline" onclick="voltarPasso1()">← Voltar</button>
+      <button class="btn btn-success" onclick="confirmarGabarito()">✓ CONFIRMAR E AVANÇAR</button>
+    </div>
   </div>
 
-  <!-- ═══ PASSO 3: CORRIGIR ALUNO ═══ -->
+  <!-- PASSO 3 -->
   <div id="passo3" class="card hidden">
-    <div class="card-title">
-      <div class="num">3</div>
-      Corrigir Prova do Aluno
-    </div>
-
-    <div class="input-group">
+    <div class="card-title"><div class="num">3</div>Corrigir Prova do Aluno</div>
+    <div class="input-row">
       <input type="text" id="nome_aluno" class="input-field" placeholder="Nome completo do aluno">
       <div></div>
     </div>
-
-    <div class="upload-area" id="uploadArea3">
-      <input type="file" id="foto_aluno" accept="image/*" onchange="previewFoto('foto_aluno','prev3')">
+    <div class="upload-area" id="ua3">
+      <input type="file" id="foto_aluno" accept="image/*" onchange="previewFoto('foto_aluno','pv3')">
       <div class="upload-icon">🎓</div>
       <div class="upload-label"><strong>Foto da prova</strong> do aluno</div>
-      <img class="preview-img" id="prev3">
+      <img class="preview-img" id="pv3">
     </div>
+    <button class="btn btn-success mt-14" id="btn_corrigir" onclick="corrigirAluno()">CALCULAR NOTA</button>
 
-    <button class="btn btn-success mt-16" id="btn_corrigir" onclick="corrigirAluno()">
-      CALCULAR NOTA
-    </button>
-
-    <!-- Debug do aluno -->
-    <div class="debug-panel mt-16" id="debugPanelAluno" style="display:none">
-      <div class="debug-header">
-        📍 Leitura da prova do aluno
-        <div class="debug-legend">
-          <div class="legend-item"><div class="legend-box" style="background:#00c800"></div> Marcada</div>
-          <div class="legend-item"><div class="legend-box" style="background:#0050c8"></div> Vazia</div>
+    <!-- Debug + Edição manual do aluno -->
+    <div id="area_edicao_aluno" class="hidden">
+      <div class="debug-panel mt-14" id="dp3">
+        <div class="debug-header">📍 Leitura da prova do aluno
+          <div class="debug-legend">
+            <div class="leg"><div class="legbox" style="background:#00c800"></div>Marcada</div>
+            <div class="leg"><div class="legbox" style="background:#0050c8"></div>Vazia</div>
+          </div>
         </div>
+        <div class="debug-img-wrap"><img id="di3" src="" alt="debug aluno"></div>
       </div>
-      <div class="debug-img-wrap">
-        <img id="debugImgAluno" src="" alt="debug aluno">
+      <div class="card mt-14" style="padding:18px">
+        <div class="card-title" style="margin-bottom:10px"><div class="num">✏</div>Ajuste manual das respostas do aluno</div>
+        <p class="hint" style="margin-bottom:14px">Corrija campos <span style="color:var(--warn)">laranja</span> (não detectados) ou qualquer resposta errada antes de calcular a nota.</p>
+        <div class="materias-grid" id="container_aluno"></div>
+        <button class="btn btn-success mt-14" onclick="calcularComAjuste()">✓ CALCULAR NOTA COM ESTAS RESPOSTAS</button>
       </div>
     </div>
   </div>
 
-  <!-- ═══ RESULTADO ═══ -->
+  <!-- RESULTADO -->
   <div id="resultado" class="hidden"></div>
-
 </main>
-
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
 let dadosGabarito = {};
+let respostasAluno = {};
 
-/* ── Utils ── */
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function setLoading(btnId, loading, label) {
-  const btn = document.getElementById(btnId);
-  btn.disabled = loading;
-  btn.innerHTML = loading
-    ? `<span class="spinner"></span>${label}`
-    : label;
+function setLoading(id, on, label) {
+  const b = document.getElementById(id);
+  b.disabled = on;
+  b.innerHTML = on ? `<span class="spinner"></span>${label}` : label;
 }
 
 function previewFoto(inputId, imgId) {
-  const file = document.getElementById(inputId).files[0];
-  if (!file) return;
+  const f = document.getElementById(inputId).files[0];
+  if (!f) return;
   const img = document.getElementById(imgId);
-  img.src = URL.createObjectURL(file);
-  img.style.display = 'block';
+  img.src = URL.createObjectURL(f); img.style.display = 'block';
 }
 
 function updateSteps(active) {
   for (let i = 1; i <= 3; i++) {
-    const dot = document.getElementById(`dot${i}`);
-    dot.className = 'step-dot' + (i < active ? ' done' : i === active ? ' active' : '');
+    const d = document.getElementById(`dot${i}`);
+    d.className = 'step-dot' + (i < active ? ' done' : i === active ? ' active' : '');
   }
 }
 
-/* ── Passo 1: Processar gabarito mestre ── */
+function renderMateriaGrid(containerId, dados, onChange) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  for (const [mat, qs] of Object.entries(dados)) {
+    let html = `<div class="materia-card"><div class="mat-nome">${mat}</div><div class="questoes-wrap">`;
+    qs.forEach((letra, i) => {
+      const cls = letra === '?' ? ' unknown' : (letra ? ' ok' : '');
+      html += `<div class="q-box">
+        <span class="q-num">Q${i+1}</span>
+        <input type="text" class="q-input${cls}" maxlength="1" value="${letra}"
+          data-mat="${mat}" data-idx="${i}"
+          oninput="onInputLetra(this,'${mat}',${i},'${containerId}')">
+      </div>`;
+    });
+    html += `</div></div>`;
+    c.innerHTML += html;
+  }
+}
+
+function onInputLetra(el, mat, idx, containerId) {
+  const v = el.value.toUpperCase().replace(/[^ABCDE?]/g,'');
+  el.value = v;
+  el.className = 'q-input' + (v === '?' || v === '' ? ' unknown' : ' ok');
+  if (containerId === 'container_materias') {
+    dadosGabarito[mat][idx] = v || '?';
+  } else {
+    respostasAluno[mat][idx] = v || '?';
+  }
+}
+
+// ── Passo 1 ──────────────────────────────────────────────────────────────
 async function processarMestre() {
-  const file = document.getElementById('foto_mestre').files[0];
-  if (!file) { toast('Selecione a foto do gabarito!'); return; }
-
+  const f = document.getElementById('foto_mestre').files[0];
+  if (!f) { toast('Selecione a foto do gabarito!'); return; }
   setLoading('btn_mestre', true, 'ANALISANDO...');
-  const fd = new FormData();
-  fd.append('imagem', file);
-
+  const fd = new FormData(); fd.append('imagem', f);
   try {
-    const res  = await fetch('/api/extrair-gabarito', { method: 'POST', body: fd });
+    const res  = await fetch('/api/extrair-gabarito', {method:'POST', body:fd});
     const data = await res.json();
-
     if (data.erro) { toast('Erro: ' + data.erro); return; }
-
     dadosGabarito = data.gabarito;
-
-    // Debug image
     if (data.debug_img) {
-      document.getElementById('debugImg').src = 'data:image/jpeg;base64,' + data.debug_img;
-      document.getElementById('debugPanel').style.display = 'block';
+      document.getElementById('di1').src = 'data:image/jpeg;base64,' + data.debug_img;
+      document.getElementById('dp1').style.display = 'block';
     }
-
-    // Renderizar matérias
-    const container = document.getElementById('container_materias');
-    container.innerHTML = '';
-
-    for (const [materia, questoes] of Object.entries(dadosGabarito)) {
-      let html = `
-        <div class="materia-card">
-          <div class="materia-nome">${materia}</div>
-          <div class="questoes-wrap">`;
-
-      questoes.forEach((letra, i) => {
-        const cls = letra === '?' ? ' unknown' : '';
-        html += `
-          <div class="q-box">
-            <span class="q-num">Q${i + 1}</span>
-            <input type="text" class="q-input${cls}" maxlength="1"
-              value="${letra}"
-              oninput="this.value=this.value.toUpperCase().replace(/[^ABCDE?]/g,'');
-                       this.className='q-input'+(this.value==='?'?' unknown':'');
-                       dadosGabarito['${materia}'][${i}]=this.value||'?'"
-            >
-          </div>`;
-      });
-
-      html += `</div></div>`;
-      container.innerHTML += html;
-    }
-
+    renderMateriaGrid('container_materias', dadosGabarito);
     document.getElementById('passo1').classList.add('hidden');
     document.getElementById('passo2').classList.remove('hidden');
-    updateSteps(2);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  } catch (e) {
-    toast('Erro de conexão com o servidor.');
-    console.error(e);
-  } finally {
-    setLoading('btn_mestre', false, 'ANALISAR GABARITO');
-  }
+    updateSteps(2); window.scrollTo({top:0, behavior:'smooth'});
+  } catch(e) { toast('Erro de conexão.'); console.error(e); }
+  finally { setLoading('btn_mestre', false, 'ANALISAR GABARITO'); }
 }
 
-/* ── Passo 2: Confirmar gabarito ── */
+function voltarPasso1() {
+  document.getElementById('passo2').classList.add('hidden');
+  document.getElementById('passo1').classList.remove('hidden');
+  updateSteps(1);
+}
+
 function confirmarGabarito() {
-  const incompletos = Object.entries(dadosGabarito)
-    .filter(([_, qs]) => qs.includes('?'))
-    .map(([m]) => m);
-
-  if (incompletos.length > 0) {
-    const ok = confirm(
-      `Atenção: ainda há "${incompletos.join(', ')}" com questões não detectadas (?). Deseja continuar assim mesmo?`
-    );
-    if (!ok) return;
-  }
-
+  const inc = Object.entries(dadosGabarito).filter(([_,qs])=>qs.includes('?')).map(([m])=>m);
+  if (inc.length > 0 && !confirm(`Ainda há "?" em: ${inc.join(', ')}. Continuar assim mesmo?`)) return;
   document.getElementById('passo2').classList.add('hidden');
   document.getElementById('passo3').classList.remove('hidden');
-  updateSteps(3);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  updateSteps(3); window.scrollTo({top:0, behavior:'smooth'});
 }
 
-/* ── Passo 3: Corrigir aluno ── */
+// ── Passo 3 ──────────────────────────────────────────────────────────────
 async function corrigirAluno() {
   const f    = document.getElementById('foto_aluno').files[0];
   const nome = document.getElementById('nome_aluno').value.trim();
   if (!f)    { toast('Selecione a foto da prova!'); return; }
-  if (!nome) { toast('Digite o nome do aluno!');   return; }
-
-  setLoading('btn_corrigir', true, 'CORRIGINDO...');
-
+  if (!nome) { toast('Digite o nome do aluno!'); return; }
+  setLoading('btn_corrigir', true, 'LENDO PROVA...');
   const fd = new FormData();
   fd.append('imagem', f);
   fd.append('nome_aluno', nome);
   fd.append('gabarito', JSON.stringify(dadosGabarito));
-
   try {
-    const res = await fetch('/api/corrigir', { method: 'POST', body: fd });
-    const d   = await res.json();
-
-    if (d.erro) { toast('Erro: ' + d.erro); return; }
-
-    // Debug aluno
-    if (d.debug_img) {
-      document.getElementById('debugImgAluno').src = 'data:image/jpeg;base64,' + d.debug_img;
-      document.getElementById('debugPanelAluno').style.display = 'block';
+    const res  = await fetch('/api/extrair-gabarito', {method:'POST', body:fd});
+    const data = await res.json();
+    if (data.erro) { toast('Erro: ' + data.erro); return; }
+    respostasAluno = data.gabarito;
+    if (data.debug_img) {
+      document.getElementById('di3').src = 'data:image/jpeg;base64,' + data.debug_img;
     }
-
-    // Renderizar resultado
-    let detalheHtml = '';
-    for (const [mat, info] of Object.entries(d.detalhes)) {
-      const badges = info.questoes.map(q => {
-        if (q.aluno === '?') return `<div class="q-badge miss" title="Q${q.questao}: não detectado">?</div>`;
-        if (q.correto)       return `<div class="q-badge ok"   title="Q${q.questao}: ${q.aluno} ✓">${q.aluno}</div>`;
-        return                      `<div class="q-badge err"  title="Q${q.questao}: ${q.aluno} (correto: ${q.gabarito})">${q.aluno}</div>`;
-      }).join('');
-
-      const pct = info.total > 0 ? Math.round((info.acertos / info.total) * 100) : 0;
-      const cor = pct >= 70 ? 'var(--green)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
-
-      detalheHtml += `
-        <div class="mat-resultado">
-          <div>
-            <div class="mat-nome">${mat}</div>
-            <div class="q-badges" style="margin-top:6px">${badges}</div>
-          </div>
-          <div class="mat-score" style="color:${cor};white-space:nowrap;margin-left:12px">
-            ${info.acertos}/${info.total}
-          </div>
-        </div>`;
-    }
-
-    const notaCor = d.nota >= 7 ? 'var(--green)' : d.nota >= 5 ? 'var(--warn)' : 'var(--red)';
-
-    document.getElementById('resultado').innerHTML = `
-      <div class="result-card">
-        <div class="result-name">Resultado de <strong>${d.nome}</strong></div>
-        <div class="result-nota" style="background: linear-gradient(135deg,${notaCor},var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent">
-          ${d.nota.toFixed(1)}
-        </div>
-        <div class="result-sub">${d.acertos} acertos de ${d.total} questões</div>
-        <div class="result-detalhes" style="margin-top:24px;text-align:left">
-          ${detalheHtml}
-        </div>
-        <button class="btn btn-primary" style="margin-top:20px" onclick="novoAluno()">
-          + CORRIGIR OUTRO ALUNO
-        </button>
-      </div>`;
-
-    document.getElementById('resultado').classList.remove('hidden');
-    document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
-
-  } catch (e) {
-    toast('Erro de conexão com o servidor.');
-    console.error(e);
-  } finally {
-    setLoading('btn_corrigir', false, 'CALCULAR NOTA');
-  }
+    renderMateriaGrid('container_aluno', respostasAluno);
+    document.getElementById('area_edicao_aluno').classList.remove('hidden');
+    document.getElementById('area_edicao_aluno').scrollIntoView({behavior:'smooth'});
+  } catch(e) { toast('Erro de conexão.'); console.error(e); }
+  finally { setLoading('btn_corrigir', false, 'CALCULAR NOTA'); }
 }
 
-/* ── Reset para novo aluno ── */
+function calcularComAjuste() {
+  const nome = document.getElementById('nome_aluno').value.trim() || 'Estudante';
+  let acertos = 0, total = 0;
+  const detalhes = {};
+  for (const [mat, q_mestre] of Object.entries(dadosGabarito)) {
+    const q_aluno = respostasAluno[mat] || [];
+    let mat_ac = 0;
+    const questoes = [];
+    q_mestre.forEach((gab, idx) => {
+      total++;
+      const aluno = (q_aluno[idx] || '?').toString();
+      const ok = aluno === gab.toString();
+      if (ok) { acertos++; mat_ac++; }
+      questoes.push({questao:idx+1, gabarito:gab, aluno, correto:ok});
+    });
+    detalhes[mat] = {acertos:mat_ac, total:q_mestre.length, questoes};
+  }
+  const nota = total > 0 ? (acertos/total*10).toFixed(2) : '0.00';
+  exibirResultado({nome, nota, acertos, total, detalhes});
+}
+
+function exibirResultado(d) {
+  const notaNum = parseFloat(d.nota);
+  const notaCor = notaNum >= 7 ? 'var(--green)' : notaNum >= 5 ? 'var(--warn)' : 'var(--red)';
+  let detalheHtml = '';
+  for (const [mat, info] of Object.entries(d.detalhes)) {
+    const badges = info.questoes.map(q => {
+      if (q.aluno === '?') return `<div class="q-badge miss" title="Q${q.questao}: não detectado">?</div>`;
+      if (q.correto)       return `<div class="q-badge ok" title="Q${q.questao}: ${q.aluno} ✓">${q.aluno}</div>`;
+      return `<div class="q-badge err" title="Q${q.questao}: ${q.aluno} (gabarito: ${q.gabarito})">${q.aluno}</div>`;
+    }).join('');
+    const pct = info.total > 0 ? Math.round(info.acertos/info.total*100) : 0;
+    const cor = pct >= 70 ? 'var(--green)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
+    detalheHtml += `
+      <div class="mat-resultado">
+        <div>
+          <div class="mat-nome2">${mat}</div>
+          <div class="q-badges">${badges}</div>
+        </div>
+        <div class="mat-score" style="color:${cor}">${info.acertos}/${info.total}</div>
+      </div>`;
+  }
+  const el = document.getElementById('resultado');
+  el.innerHTML = `
+    <div class="result-card">
+      <div class="result-name">Resultado de <strong>${d.nome}</strong></div>
+      <div class="result-nota" style="color:${notaCor}">${parseFloat(d.nota).toFixed(1)}</div>
+      <div class="result-sub">${d.acertos} acertos de ${d.total} questões</div>
+      <div style="margin-top:22px;text-align:left">${detalheHtml}</div>
+      <button class="btn btn-primary" style="margin-top:18px" onclick="novoAluno()">+ CORRIGIR OUTRO ALUNO</button>
+    </div>`;
+  el.classList.remove('hidden');
+  el.scrollIntoView({behavior:'smooth'});
+}
+
 function novoAluno() {
   document.getElementById('nome_aluno').value = '';
   document.getElementById('foto_aluno').value = '';
-  document.getElementById('prev3').style.display = 'none';
-  document.getElementById('debugPanelAluno').style.display = 'none';
+  document.getElementById('pv3').style.display = 'none';
+  document.getElementById('area_edicao_aluno').classList.add('hidden');
   document.getElementById('resultado').classList.add('hidden');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
-/* ── Drag & drop ── */
-['uploadArea1','uploadArea3'].forEach(id => {
+// Drag & drop
+['ua1','ua3'].forEach(id => {
   const el = document.getElementById(id);
   el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
   el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
   el.addEventListener('drop', e => {
     e.preventDefault(); el.classList.remove('drag-over');
-    const input = el.querySelector('input[type=file]');
+    const inp = el.querySelector('input[type=file]');
     if (e.dataTransfer.files.length) {
-      const dt = new DataTransfer();
-      dt.items.add(e.dataTransfer.files[0]);
-      input.files = dt.files;
-      input.dispatchEvent(new Event('change'));
+      const dt = new DataTransfer(); dt.items.add(e.dataTransfer.files[0]);
+      inp.files = dt.files; inp.dispatchEvent(new Event('change'));
     }
   });
 });
