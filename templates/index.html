@@ -372,4 +372,52 @@ async function corrigirAluno() {
 
     } catch(e) {
       setStatus('status-aluno', '❌ Erro de conexão', 'erro');
-      document.getElementById('btnCorri
+      document.getElementById('btnCorrigir').disabled = false;
+    }
+  }, 'image/jpeg', 0.92);
+}
+
+function renderizarResultado(data) {
+  const area = document.getElementById('area-resultado');
+  let html = `
+    <div class="nota-box">
+      <div class="nota-num">${data.nota}</div>
+      <div class="nota-sub">${data.acertos} acertos de ${data.total} questões</div>
+    </div>`;
+
+  for (const [materia, questoes] of Object.entries(data.comparacao)) {
+    const acertos = questoes.filter(q => q.acerto).length;
+    html += `<div class="resultado-materia">
+      <h4>${materia} — ${acertos}/${questoes.length}</h4>`;
+    questoes.forEach(q => {
+      const classe = q.acerto ? 'acerto' : (q.aluno === '?' ? 'sem' : 'erro');
+      const label = q.acerto ? '✓' : (q.aluno === '?' ? '?' : '✗');
+      html += `<div class="questao-linha">
+        <span style="min-width:30px;color:#94a3b8">Q${q.questao}</span>
+        <span class="badge ${classe}">${label}</span>
+        <span>Aluno: <b>${q.aluno}</b></span>
+        <span style="color:#64748b">Gab: <b>${q.gabarito}</b></span>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  area.innerHTML = html;
+}
+
+function renderizarSoRespostas(respostas) {
+  const area = document.getElementById('area-resultado');
+  let html = `<div class="card"><h3>Respostas Detectadas</h3>`;
+  for (const [materia, resps] of Object.entries(respostas)) {
+    html += `<div style="margin:8px 0"><b style="color:#a78bfa">${materia}:</b> `;
+    resps.forEach((r, i) => {
+      html += `<span style="margin:0 4px;color:${r==='?'?'#f87171':'#4ade80'}">Q${i+1}:${r}</span>`;
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+  area.innerHTML = html;
+}
+</script>
+</body>
+</html>
