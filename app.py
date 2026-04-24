@@ -132,13 +132,13 @@ def detectar_respostas(img_bytes, config=None):
                     x = col_x + alt * passo_x
                     roi = mascara[y:y+35, x:x+35]
 
-                    if roi.shape[0] == 0:
+                    if roi.shape[0] == 0 or roi.shape[1] == 0 or roi.size == 0:
                         marcacoes.append(0.0)
                         continue
 
                     area = cv2.countNonZero(roi)
                     total = roi.shape[0] * roi.shape[1]
-                    marcacoes.append(area / total)
+                    marcacoes.append(area / total if total > 0 else 0.0)
 
                     # Desenha retângulo de debug
                     cor = (0, 200, 0) if alt == np.argmax(marcacoes) else (60, 60, 60)
