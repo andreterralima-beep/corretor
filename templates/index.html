@@ -3,520 +3,175 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Corretor Jales Machado</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<title>Corretor Inteligente</title>
+
 <style>
-:root {
-  --bg:#0a0f1e; --surface:#111827; --card:#1a2235; --border:#1e3a5f;
-  --accent:#00d4ff; --accent2:#00ff9d; --warn:#ff6b35;
-  --text:#e2e8f0; --muted:#64748b; --green:#22c55e; --red:#ef4444;
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial;
+  text-align:center;
+  padding:20px;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh}
-
-header{background:linear-gradient(135deg,#0d1b2a,#1a2a4a);border-bottom:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;gap:12px}
-.logo{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
-header h1{font-size:1.25rem;font-weight:700}
-header span{color:var(--accent)}
-.badge{margin-left:auto;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);color:var(--accent);padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:1px}
-
-main{max-width:1100px;margin:0 auto;padding:28px 20px}
-
-.steps{display:flex;gap:6px;margin-bottom:28px}
-.step-dot{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .4s}
-.step-dot.active{background:var(--accent)}
-.step-dot.done{background:var(--accent2)}
-
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px}
-.card-title{display:flex;align-items:center;gap:10px;font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--accent)}
-.num{width:26px;height:26px;background:rgba(0,212,255,.15);border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0}
-.hint{color:var(--muted);font-size:.83rem;margin-bottom:14px;line-height:1.5}
-
-/* Upload */
-.upload-area{border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
-.upload-area:hover,.upload-area.drag-over{border-color:var(--accent);background:rgba(0,212,255,.04)}
-.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.upload-icon{font-size:2.2rem;margin-bottom:8px}
-.upload-label{font-size:.9rem;color:var(--muted)}
-.upload-label strong{color:var(--accent)}
-.preview-img{max-width:100%;max-height:180px;border-radius:8px;margin-top:10px;border:1px solid var(--border);display:none}
-
-/* Botões */
-.btn{width:100%;padding:13px 20px;border:none;border-radius:9px;font-family:'Space Grotesk',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.4px}
-.btn-primary{background:linear-gradient(135deg,var(--accent),#0090b3);color:#0a0f1e}
-.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.btn-success{background:linear-gradient(135deg,var(--accent2),#00b370);color:#0a0f1e}
-.btn-success:hover{filter:brightness(1.1);transform:translateY(-1px)}
-.btn-success:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);width:auto;padding:8px 16px;font-size:.85rem;border-radius:9px;font-family:'Space Grotesk',sans-serif;font-weight:600;cursor:pointer;transition:all .2s}
-.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
-
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:#0a0f1e;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* Debug */
-.debug-panel{border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.debug-header{background:rgba(0,212,255,.08);padding:8px 14px;font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:8px}
-.debug-legend{display:flex;gap:14px;margin-left:auto}
-.leg{display:flex;align-items:center;gap:4px;font-size:.72rem}
-.legbox{width:11px;height:11px;border-radius:2px}
-.debug-img-wrap{overflow:auto;max-height:380px;text-align:center}
-.debug-img-wrap img{max-width:100%}
-
-/* Grid de matérias */
-.materias-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
-.materia-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:10px;padding:14px}
-.mat-nome{font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
-.questoes-wrap{display:flex;flex-wrap:wrap;gap:7px}
-.q-box{display:flex;flex-direction:column;align-items:center;gap:2px}
-.q-num{font-size:.62rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
-
-/* Input de questão */
-.q-input{
-  width:36px;height:34px;
-  background:var(--bg);
-  border:2px solid var(--border);
-  border-radius:6px;
-  color:var(--text);
-  font-size:.95rem;font-weight:700;
-  font-family:'JetBrains Mono',monospace;
-  text-align:center;outline:none;
-  transition:border-color .15s, background .15s;
+.card{
+  background:#1e293b;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
 }
-.q-input:focus{border-color:var(--accent)}
-.q-input.unknown{border-color:var(--warn)!important;color:var(--warn);background:rgba(255,107,53,.08)}
-.q-input.ok{border-color:rgba(0,255,157,.4);color:var(--accent2)}
-.q-input.edited{border-color:#a78bfa;color:#a78bfa;background:rgba(167,139,250,.08)}
-
-/* Legenda dos campos */
-.field-legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px}
-.fleg{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--muted)}
-.fleg-box{width:22px;height:20px;border-radius:4px;border:2px solid;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;font-family:'JetBrains Mono',monospace}
-
-/* Contador de pendências */
-.pending-banner{
-  background:rgba(255,107,53,.12);
-  border:1px solid rgba(255,107,53,.4);
-  border-radius:9px;
-  padding:10px 16px;
-  font-size:.85rem;
-  color:var(--warn);
-  display:flex;align-items:center;gap:8px;
-  margin-bottom:14px;
+button{
+  padding:12px;
+  margin-top:10px;
+  width:100%;
+  border:none;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
 }
-.pending-banner.ok{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:var(--green)}
-
-/* Resultado */
-.result-card{background:linear-gradient(135deg,#0d1f0d,#0d2a0d);border:1px solid #1a5c1a;border-radius:14px;padding:28px;text-align:center}
-.result-name{font-size:1rem;color:var(--muted);margin-bottom:6px}
-.result-name strong{color:var(--text)}
-.result-nota{font-size:4.5rem;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
-.result-sub{color:var(--muted);margin-top:6px;font-size:.9rem}
-.result-detalhes{margin-top:20px;text-align:left}
-.mat-resultado{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:rgba(0,0,0,.3);border-radius:7px;margin-bottom:7px}
-.mat-resultado .mat-nome2{font-size:.82rem;color:var(--muted)}
-.mat-resultado .mat-score{font-weight:700;font-family:'JetBrains Mono',monospace;white-space:nowrap;margin-left:10px}
-.q-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
-.q-badge{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;font-family:'JetBrains Mono',monospace;cursor:default}
-.q-badge.ok{background:rgba(34,197,94,.2);color:var(--green);border:1px solid rgba(34,197,94,.4)}
-.q-badge.err{background:rgba(239,68,68,.2);color:var(--red);border:1px solid rgba(239,68,68,.4)}
-.q-badge.miss{background:rgba(255,107,53,.15);color:var(--warn);border:1px solid rgba(255,107,53,.3)}
-
-.input-field{width:100%;padding:11px 14px;background:var(--bg);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s}
-.input-field:focus{border-color:var(--accent)}
-.input-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-
-.toast{position:fixed;bottom:20px;right:20px;background:var(--warn);color:#fff;padding:10px 18px;border-radius:9px;font-weight:600;font-size:.88rem;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;z-index:999}
-.toast.show{opacity:1;transform:translateY(0)}
-
-.hidden{display:none!important}
-.mt-14{margin-top:14px}
-.row-btns{display:flex;gap:10px;margin-top:14px}
-.row-btns .btn{flex:1}
-.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+.btn{background:#00d4ff;color:#000;}
+input{width:100%;padding:10px;margin-top:10px}
+video, canvas, img{
+  width:100%;
+  max-width:400px;
+  margin-top:10px;
+  border-radius:10px;
+}
+label{display:block;margin-top:10px}
 </style>
 </head>
+
 <body>
-<header>
-  <div class="logo">📋</div>
-  <h1>Corretor <span>Jales Machado</span></h1>
-  <div class="badge">GRATUITO · OpenCV</div>
-</header>
-<main>
-  <div class="steps">
-    <div class="step-dot active" id="dot1"></div>
-    <div class="step-dot" id="dot2"></div>
-    <div class="step-dot" id="dot3"></div>
-    <div class="step-dot" id="dot4"></div>
-  </div>
 
-  <!-- ═══ PASSO 1: GABARITO MESTRE ═══ -->
-  <div id="passo1" class="card">
-    <div class="card-title"><div class="num">1</div>Foto do Gabarito Mestre</div>
-    <p class="hint">Foto clara da folha de respostas correta. Funciona com marcação azul sólida ou hachurada.</p>
-    <div class="upload-area" id="ua1">
-      <input type="file" id="foto_mestre" accept="image/*" onchange="previewFoto('foto_mestre','pv1')">
-      <div class="upload-icon">📷</div>
-      <div class="upload-label"><strong>Clique ou arraste</strong> a foto aqui</div>
-      <img class="preview-img" id="pv1">
-    </div>
-    <button class="btn btn-primary mt-14" id="btn_mestre" onclick="processarMestre()">ANALISAR GABARITO</button>
-  </div>
+<h2>📋 Corretor de Prova</h2>
 
-  <!-- ═══ PASSO 2: REVISAR GABARITO ═══ -->
-  <div id="passo2" class="card hidden">
-    <div class="card-title"><div class="num">2</div>Revisar Gabarito</div>
-    <p class="hint">Verifique as respostas detectadas e corrija manualmente se necessário.</p>
+<!-- ========================= -->
+<!-- 📸 CAMERA -->
+<!-- ========================= -->
+<div class="card">
+  <h3>📷 Câmera</h3>
+  <video id="video" autoplay playsinline></video>
+  <button class="btn" onclick="tirarFoto()">📸 Tirar Foto</button>
+  <canvas id="canvas" style="display:none;"></canvas>
+  <img id="preview">
+</div>
 
-    <div class="field-legend">
-      <div class="fleg"><div class="fleg-box" style="border-color:rgba(0,255,157,.4);color:var(--accent2)">D</div> Detectado</div>
-      <div class="fleg"><div class="fleg-box" style="border-color:var(--warn);color:var(--warn)">?</div> Não lido — edite</div>
-      <div class="fleg"><div class="fleg-box" style="border-color:#a78bfa;color:#a78bfa">B</div> Editado manualmente</div>
-    </div>
+<!-- ========================= -->
+<!-- ⚙️ CALIBRAÇÃO -->
+<!-- ========================= -->
+<div class="card">
+  <h3>⚙️ Calibração</h3>
 
-    <div id="pending_mestre" class="pending-banner hidden"></div>
+  <label>Ruído (blur): <span id="v_blur">5</span></label>
+  <input type="range" min="1" max="11" step="2" value="5" id="blur">
 
-    <div class="debug-panel" id="dp1" style="display:none">
-      <div class="debug-header">📍 Visualização das caixas detectadas
-        <div class="debug-legend">
-          <div class="leg"><div class="legbox" style="background:#00c800"></div>Marcada</div>
-          <div class="leg"><div class="legbox" style="background:#0050c8"></div>Vazia</div>
-        </div>
-      </div>
-      <div class="debug-img-wrap"><img id="di1" src="" alt="debug"></div>
-    </div>
+  <label>Threshold bloco: <span id="v_tb">15</span></label>
+  <input type="range" min="3" max="35" step="2" value="15" id="thresh_block">
 
-    <div class="materias-grid mt-14" id="container_mestre"></div>
+  <label>Contraste (C): <span id="v_tc">5</span></label>
+  <input type="range" min="1" max="15" value="5" id="thresh_C">
 
-    <div class="row-btns">
-      <button class="btn btn-outline" onclick="ir(1)">← Voltar</button>
-      <button class="btn btn-success" id="btn_confirmar" onclick="confirmarGabarito()">✓ CONFIRMAR GABARITO</button>
-    </div>
-  </div>
+  <label>Sensibilidade marca: <span id="v_fill">0.25</span></label>
+  <input type="range" min="0.10" max="0.50" step="0.01" value="0.25" id="fill_min">
 
-  <!-- ═══ PASSO 3: FOTO DO ALUNO ═══ -->
-  <div id="passo3" class="card hidden">
-    <div class="card-title"><div class="num">3</div>Foto da Prova do Aluno</div>
-    <div class="input-row">
-      <input type="text" id="nome_aluno" class="input-field" placeholder="Nome completo do aluno">
-      <div></div>
-    </div>
-    <div class="upload-area" id="ua3">
-      <input type="file" id="foto_aluno" accept="image/*" capture="environment" onchange="previewFoto('foto_aluno','pv3')">
-      <div class="upload-icon">🎓</div>
-      <div class="upload-label"><strong>Clique ou arraste</strong> a foto da prova aqui</div>
-      <img class="preview-img" id="pv3">
-    </div>
-    <div class="row-btns">
-      <button class="btn btn-outline" onclick="ir(2)">← Voltar</button>
-      <button class="btn btn-primary mt-14" id="btn_ler_aluno" onclick="lerAluno()">LER RESPOSTAS DO ALUNO</button>
-    </div>
-  </div>
+</div>
 
-  <!-- ═══ PASSO 4: EDIÇÃO MANUAL + CALCULAR ═══ -->
-  <div id="passo4" class="card hidden">
-    <div class="card-title"><div class="num">4</div>Confirmar Respostas do Aluno</div>
-    <p class="hint">
-      Confira as respostas lidas automaticamente.
-      Campos <span style="color:var(--warn)">laranja</span> não foram detectados — <strong>clique e digite a letra correta</strong>.
-      Qualquer campo pode ser corrigido antes de calcular.
-    </p>
+<!-- ========================= -->
+<!-- 🎯 AÇÕES -->
+<!-- ========================= -->
+<div class="card">
+  <button class="btn" onclick="ler()">🔍 LER GABARITO</button>
+</div>
 
-    <div class="field-legend">
-      <div class="fleg"><div class="fleg-box" style="border-color:rgba(0,255,157,.4);color:var(--accent2)">D</div> Detectado</div>
-      <div class="fleg"><div class="fleg-box" style="border-color:var(--warn);color:var(--warn)">?</div> Não detectado — edite</div>
-      <div class="fleg"><div class="fleg-box" style="border-color:#a78bfa;color:#a78bfa">B</div> Editado manualmente</div>
-    </div>
-
-    <div id="pending_aluno" class="pending-banner hidden"></div>
-
-    <div class="debug-panel" id="dp3">
-      <div class="debug-header">📍 Leitura da prova do aluno
-        <div class="debug-legend">
-          <div class="leg"><div class="legbox" style="background:#00c800"></div>Marcada</div>
-          <div class="leg"><div class="legbox" style="background:#0050c8"></div>Vazia</div>
-        </div>
-      </div>
-      <div class="debug-img-wrap"><img id="di3" src="" alt="debug aluno"></div>
-    </div>
-
-    <div class="materias-grid mt-14" id="container_aluno"></div>
-
-    <div class="row-btns mt-14">
-      <button class="btn btn-outline" onclick="ir(3)">← Nova foto</button>
-      <button class="btn btn-success" id="btn_calcular" onclick="calcularNota()">✓ CALCULAR NOTA</button>
-    </div>
-  </div>
-
-  <!-- ═══ RESULTADO ═══ -->
-  <div id="resultado" class="hidden"></div>
-
-</main>
-<div class="toast" id="toast"></div>
+<!-- ========================= -->
+<!-- RESULTADO -->
+<!-- ========================= -->
+<div class="card">
+  <h3>📊 Resultado</h3>
+  <pre id="saida"></pre>
+  <img id="debug">
+</div>
 
 <script>
-// ── Estado global ─────────────────────────────────────────────────────────
-let dadosGabarito  = {};   // gabarito mestre confirmado
-let respostasAluno = {};   // respostas do aluno (editáveis)
+// ==============================
+// 📸 ATIVAR CÂMERA
+// ==============================
+const video = document.getElementById('video');
 
-// ── Utilitários ──────────────────────────────────────────────────────────
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-function setLoading(id, on, label) {
-  const b = document.getElementById(id);
-  b.disabled = on;
-  b.innerHTML = on ? `<span class="spinner"></span>${label}` : label;
-}
-
-function previewFoto(inputId, imgId) {
-  const f = document.getElementById(inputId).files[0];
-  if (!f) return;
-  const img = document.getElementById(imgId);
-  img.src = URL.createObjectURL(f);
-  img.style.display = 'block';
-}
-
-function ir(passo) {
-  [1,2,3,4].forEach(i => {
-    document.getElementById(`passo${i}`).classList.toggle('hidden', i !== passo);
-    const dot = document.getElementById(`dot${i}`);
-    dot.className = 'step-dot' + (i < passo ? ' done' : i === passo ? ' active' : '');
-  });
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-
-// ── Render do grid editável ───────────────────────────────────────────────
-function renderGrid(containerId, dados, originals) {
-  const c = document.getElementById(containerId);
-  c.innerHTML = '';
-  for (const [mat, qs] of Object.entries(dados)) {
-    let html = `<div class="materia-card"><div class="mat-nome">${mat}</div><div class="questoes-wrap">`;
-    qs.forEach((letra, i) => {
-      const orig = originals ? originals[mat]?.[i] : letra;
-      const cls = getInputClass(letra, orig);
-      html += `<div class="q-box">
-        <span class="q-num">Q${i+1}</span>
-        <input type="text" class="q-input ${cls}" maxlength="1"
-          value="${letra === '?' ? '' : letra}"
-          placeholder="${letra === '?' ? '?' : ''}"
-          data-orig="${orig}"
-          oninput="onLetraInput(this,'${containerId}','${mat}',${i})">
-      </div>`;
-    });
-    html += `</div></div>`;
-    c.innerHTML += html;
-  }
-  atualizarPendentes(containerId);
-}
-
-function getInputClass(letra, orig) {
-  if (!letra || letra === '?') return 'unknown';
-  if (orig && orig !== '?' && letra !== orig) return 'edited';
-  return 'ok';
-}
-
-function onLetraInput(el, containerId, mat, idx) {
-  const v = el.value.toUpperCase().replace(/[^ABCDE]/g, '');
-  el.value = v;
-  const orig = el.dataset.orig;
-  el.className = 'q-input ' + (v === '' ? 'unknown' : v !== orig && orig && orig !== '?' ? 'edited' : 'ok');
-
-  // Atualizar o estado correto
-  if (containerId === 'container_mestre') {
-    dadosGabarito[mat][idx] = v || '?';
-  } else {
-    respostasAluno[mat][idx] = v || '?';
-  }
-  atualizarPendentes(containerId);
-}
-
-function atualizarPendentes(containerId) {
-  const bannerId = containerId === 'container_mestre' ? 'pending_mestre' : 'pending_aluno';
-  const banner = document.getElementById(bannerId);
-  if (!banner) return;
-
-  const dados = containerId === 'container_mestre' ? dadosGabarito : respostasAluno;
-  let count = 0;
-  for (const qs of Object.values(dados)) {
-    count += qs.filter(q => !q || q === '?').length;
-  }
-
-  if (count === 0) {
-    banner.className = 'pending-banner ok';
-    banner.innerHTML = '✓ Todas as questões preenchidas! Pode avançar.';
-    banner.classList.remove('hidden');
-  } else {
-    banner.className = 'pending-banner';
-    banner.innerHTML = `⚠ ${count} questão(ões) com <strong>?</strong> — preencha manualmente antes de continuar.`;
-    banner.classList.remove('hidden');
-  }
-}
-
-// ── Passo 1 → 2: Processar gabarito ──────────────────────────────────────
-async function processarMestre() {
-  const f = document.getElementById('foto_mestre').files[0];
-  if (!f) { toast('Selecione a foto do gabarito!'); return; }
-  setLoading('btn_mestre', true, 'ANALISANDO...');
-  const fd = new FormData(); fd.append('imagem', f);
-  try {
-    const res  = await fetch('/api/extrair-gabarito', {method:'POST', body:fd});
-    const data = await res.json();
-    if (data.erro) { toast('Erro: ' + data.erro); return; }
-
-    dadosGabarito = data.gabarito;
-    const originals = JSON.parse(JSON.stringify(data.gabarito)); // cópia dos originais
-
-    if (data.debug_img) {
-      document.getElementById('di1').src = 'data:image/jpeg;base64,' + data.debug_img;
-      document.getElementById('dp1').style.display = 'block';
-    }
-    renderGrid('container_mestre', dadosGabarito, originals);
-    ir(2);
-  } catch(e) { toast('Erro de conexão.'); console.error(e); }
-  finally { setLoading('btn_mestre', false, 'ANALISAR GABARITO'); }
-}
-
-// ── Passo 2 → 3: Confirmar gabarito ──────────────────────────────────────
-function confirmarGabarito() {
-  const inc = Object.entries(dadosGabarito).filter(([_,qs])=>qs.includes('?')).map(([m])=>m);
-  if (inc.length > 0 && !confirm(`Ainda há "?" em: ${inc.join(', ')}.\n\nDeseja continuar assim mesmo?`)) return;
-  ir(3);
-}
-
-// ── Passo 3 → 4: Ler prova do aluno ──────────────────────────────────────
-async function lerAluno() {
-  const f    = document.getElementById('foto_aluno').files[0];
-  const nome = document.getElementById('nome_aluno').value.trim();
-  if (!f)    { toast('Selecione a foto da prova!'); return; }
-  if (!nome) { toast('Digite o nome do aluno!');   return; }
-
-  setLoading('btn_ler_aluno', true, 'LENDO...');
-  const fd = new FormData(); fd.append('imagem', f);
-  try {
-    const res  = await fetch('/api/extrair-gabarito', {method:'POST', body:fd});
-    const data = await res.json();
-    if (data.erro) { toast('Erro: ' + data.erro); return; }
-
-    respostasAluno = data.gabarito;
-    const originals = JSON.parse(JSON.stringify(data.gabarito));
-
-    if (data.debug_img) {
-      document.getElementById('di3').src = 'data:image/jpeg;base64,' + data.debug_img;
-    }
-    renderGrid('container_aluno', respostasAluno, originals);
-    ir(4);
-  } catch(e) { toast('Erro de conexão.'); console.error(e); }
-  finally { setLoading('btn_ler_aluno', false, 'LER RESPOSTAS DO ALUNO'); }
-}
-
-// ── Passo 4: Calcular nota ────────────────────────────────────────────────
-function calcularNota() {
-  const nome = document.getElementById('nome_aluno').value.trim() || 'Estudante';
-
-  // Verificar se há pendências
-  let pendencias = 0;
-  for (const qs of Object.values(respostasAluno)) {
-    pendencias += qs.filter(q => !q || q === '?').length;
-  }
-  if (pendencias > 0 && !confirm(`Ainda há ${pendencias} questão(ões) não preenchida(s).\nElas serão contadas como erradas. Continuar?`)) return;
-
-  let acertos = 0, total = 0;
-  const detalhes = {};
-
-  for (const [mat, q_mestre] of Object.entries(dadosGabarito)) {
-    const q_aluno = respostasAluno[mat] || [];
-    let mat_ac = 0;
-    const questoes = [];
-    q_mestre.forEach((gab, idx) => {
-      total++;
-      const aluno = (q_aluno[idx] || '?').toString();
-      const ok = aluno !== '?' && aluno === gab.toString();
-      if (ok) { acertos++; mat_ac++; }
-      questoes.push({questao:idx+1, gabarito:gab, aluno, correto:ok});
-    });
-    detalhes[mat] = {acertos:mat_ac, total:q_mestre.length, questoes};
-  }
-
-  const nota = total > 0 ? (acertos / total * 10).toFixed(2) : '0.00';
-  exibirResultado({nome, nota, acertos, total, detalhes});
-}
-
-// ── Exibir resultado ──────────────────────────────────────────────────────
-function exibirResultado(d) {
-  const notaNum = parseFloat(d.nota);
-  const notaCor = notaNum >= 7 ? 'var(--green)' : notaNum >= 5 ? 'var(--warn)' : 'var(--red)';
-
-  let detalheHtml = '';
-  for (const [mat, info] of Object.entries(d.detalhes)) {
-    const badges = info.questoes.map(q => {
-      const title = `Q${q.questao}: aluno=${q.aluno} | gabarito=${q.gabarito}`;
-      if (q.aluno === '?') return `<div class="q-badge miss" title="${title}">?</div>`;
-      if (q.correto)       return `<div class="q-badge ok"  title="${title}">${q.aluno}</div>`;
-      return                      `<div class="q-badge err" title="${title}">${q.aluno}</div>`;
-    }).join('');
-    const pct = info.total > 0 ? Math.round(info.acertos / info.total * 100) : 0;
-    const cor = pct >= 70 ? 'var(--green)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
-    detalheHtml += `
-      <div class="mat-resultado">
-        <div>
-          <div class="mat-nome2">${mat}</div>
-          <div class="q-badges">${badges}</div>
-        </div>
-        <div class="mat-score" style="color:${cor}">${info.acertos}/${info.total}</div>
-      </div>`;
-  }
-
-  const el = document.getElementById('resultado');
-  el.innerHTML = `
-    <div class="result-card">
-      <div class="result-name">Resultado de <strong>${d.nome}</strong></div>
-      <div class="result-nota" style="color:${notaCor}">${notaNum.toFixed(1)}</div>
-      <div class="result-sub">${d.acertos} acertos de ${d.total} questões</div>
-      <div class="result-detalhes">${detalheHtml}</div>
-      <div class="row-btns" style="margin-top:18px">
-        <button class="btn btn-outline" onclick="voltarEditar()">✏ Corrigir respostas</button>
-        <button class="btn btn-success" onclick="novoAluno()">+ Novo aluno</button>
-      </div>
-    </div>`;
-  el.classList.remove('hidden');
-  el.scrollIntoView({behavior:'smooth'});
-}
-
-function voltarEditar() {
-  document.getElementById('resultado').classList.add('hidden');
-  ir(4);
-}
-
-function novoAluno() {
-  document.getElementById('resultado').classList.add('hidden');
-  document.getElementById('nome_aluno').value = '';
-  document.getElementById('foto_aluno').value = '';
-  document.getElementById('pv3').style.display = 'none';
-  respostasAluno = {};
-  ir(3);
-}
-
-// ── Drag & drop ───────────────────────────────────────────────────────────
-['ua1','ua3'].forEach(id => {
-  const el = document.getElementById(id);
-  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
-  el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
-  el.addEventListener('drop', e => {
-    e.preventDefault(); el.classList.remove('drag-over');
-    const inp = el.querySelector('input[type=file]');
-    if (e.dataTransfer.files.length) {
-      const dt = new DataTransfer();
-      dt.items.add(e.dataTransfer.files[0]);
-      inp.files = dt.files;
-      inp.dispatchEvent(new Event('change'));
-    }
-  });
+navigator.mediaDevices.getUserMedia({
+  video: { facingMode: "environment" }
+}).then(stream => {
+  video.srcObject = stream;
 });
+
+// ==============================
+// 📸 CAPTURA FOTO
+// ==============================
+function tirarFoto(){
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  ctx.drawImage(video, 0, 0);
+
+  const img = document.getElementById('preview');
+  img.src = canvas.toDataURL('image/jpeg');
+}
+
+// ==============================
+// 🎛️ ATUALIZA LABELS
+// ==============================
+["blur","thresh_block","thresh_C","fill_min"].forEach(id=>{
+  const el = document.getElementById(id);
+  const label = document.getElementById("v_"+id.split("_")[0]);
+
+  el.oninput = () => label.textContent = el.value;
+});
+
+// ==============================
+// 🚀 ENVIO PARA BACKEND
+// ==============================
+async function ler(){
+
+  const canvas = document.getElementById('canvas');
+
+  if (!canvas.width){
+    alert("Tire a foto primeiro!");
+    return;
+  }
+
+  canvas.toBlob(async (blob)=>{
+
+    const fd = new FormData();
+
+    fd.append("imagem", blob, "foto.jpg");
+
+    // 🔥 CALIBRAÇÃO
+    fd.append("blur", document.getElementById("blur").value);
+    fd.append("thresh_block", document.getElementById("thresh_block").value);
+    fd.append("thresh_C", document.getElementById("thresh_C").value);
+    fd.append("fill_min", document.getElementById("fill_min").value);
+
+    const res = await fetch("/api/extrair-gabarito", {
+      method:"POST",
+      body:fd
+    });
+
+    const data = await res.json();
+
+    document.getElementById("saida").textContent =
+      JSON.stringify(data.gabarito, null, 2);
+
+    if (data.debug_img){
+      document.getElementById("debug").src =
+        "data:image/jpeg;base64," + data.debug_img;
+    }
+
+  }, "image/jpeg");
+
+}
 </script>
+
 </body>
 </html>
