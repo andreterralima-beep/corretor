@@ -2,117 +2,374 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Corretor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corretor de Provas</title>
 <style>
-body{background:#0f172a;color:#fff;font-family:Arial;text-align:center}
-.card{background:#1e293b;padding:20px;margin:15px;border-radius:10px}
-button{padding:10px;width:100%;margin-top:10px}
-video,img{width:100%;max-width:400px;margin-top:10px}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;min-height:100vh}
+  h1{text-align:center;padding:18px;background:#1e293b;font-size:1.3rem;border-bottom:2px solid #3b82f6;color:#60a5fa}
+  
+  .tabs{display:flex;background:#1e293b;border-bottom:1px solid #334155}
+  .tab{flex:1;padding:12px;text-align:center;cursor:pointer;font-size:0.9rem;color:#94a3b8;border:none;background:none;transition:.2s}
+  .tab.ativo{color:#3b82f6;border-bottom:3px solid #3b82f6;font-weight:bold}
+
+  .pagina{display:none;padding:16px;max-width:700px;margin:0 auto}
+  .pagina.ativo{display:block}
+
+  .card{background:#1e293b;border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid #334155}
+  .card h3{color:#60a5fa;margin-bottom:12px;font-size:1rem}
+
+  button{background:#3b82f6;color:#fff;border:none;border-radius:8px;padding:10px 16px;cursor:pointer;font-size:0.9rem;margin-top:8px;width:100%}
+  button:hover{background:#2563eb}
+  button.verde{background:#16a34a} button.verde:hover{background:#15803d}
+  button.cinza{background:#475569} button.cinza:hover{background:#334155}
+  button.vermelho{background:#dc2626} button.vermelho:hover{background:#b91c1c}
+  button:disabled{background:#334155;cursor:not-allowed;opacity:.6}
+
+  input[type=file]{width:100%;padding:8px;background:#0f172a;border:1px solid #334155;border-radius:6px;color:#e2e8f0}
+
+  .slider-grupo{margin:8px 0}
+  .slider-grupo label{font-size:0.82rem;color:#94a3b8;display:flex;justify-content:space-between}
+  input[type=range]{width:100%;accent-color:#3b82f6}
+
+  video,canvas.preview-img{width:100%;max-height:320px;border-radius:8px;background:#000;object-fit:contain;display:block}
+  .debug-img{width:100%;border-radius:8px;margin-top:10px;border:1px solid #334155}
+  .hidden{display:none}
+
+  /* Gabarito grade */
+  .gab-grade{display:flex;flex-direction:column;gap:10px}
+  .gab-materia{background:#0f172a;border-radius:8px;padding:10px;border:1px solid #334155}
+  .gab-materia h4{color:#a78bfa;font-size:0.85rem;margin-bottom:8px}
+  .gab-questoes{display:flex;flex-wrap:wrap;gap:6px}
+  .gab-q{display:flex;align-items:center;gap:4px;font-size:0.8rem;color:#94a3b8}
+  .gab-q span{min-width:20px}
+  .gab-q select{background:#1e293b;color:#e2e8f0;border:1px solid #475569;border-radius:4px;padding:3px 5px;font-size:0.8rem}
+
+  /* Resultado correção */
+  .resultado-materia{background:#0f172a;border-radius:8px;padding:10px;border:1px solid #334155;margin-bottom:8px}
+  .resultado-materia h4{color:#a78bfa;font-size:0.85rem;margin-bottom:8px}
+  .questao-linha{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:0.82rem}
+  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-weight:bold;font-size:0.78rem}
+  .badge.acerto{background:#166534;color:#4ade80}
+  .badge.erro{background:#7f1d1d;color:#f87171}
+  .badge.sem{background:#3b3b00;color:#fde047}
+
+  .nota-box{text-align:center;padding:20px;background:#1e3a5f;border-radius:12px;margin-bottom:12px}
+  .nota-box .nota-num{font-size:3rem;font-weight:bold;color:#60a5fa}
+  .nota-box .nota-sub{color:#94a3b8;font-size:0.9rem}
+
+  .status-bar{padding:8px 12px;border-radius:6px;font-size:0.85rem;margin:8px 0;text-align:center}
+  .status-bar.ok{background:#14532d;color:#4ade80}
+  .status-bar.aviso{background:#78350f;color:#fbbf24}
+  .status-bar.erro{background:#7f1d1d;color:#f87171}
+
+  .spinner{display:inline-block;width:18px;height:18px;border:3px solid #334155;border-top:3px solid #3b82f6;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .cam-container{position:relative;background:#000;border-radius:8px;overflow:hidden}
+  .cam-overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;border:3px dashed rgba(59,130,246,.5)}
+  .cam-overlay::after{content:'';position:absolute;top:10%;left:5%;right:5%;bottom:10%;border:2px solid rgba(59,130,246,.4);border-radius:4px}
 </style>
 </head>
-
 <body>
 
-<h2>📋 Corretor</h2>
+<h1>📋 Corretor de Provas</h1>
 
-<div class="card">
-<h3>📄 Gabarito</h3>
-<input type="file" id="foto_mestre">
-<button onclick="enviarGabarito()">Ler Gabarito</button>
+<div class="tabs">
+  <button class="tab ativo" onclick="trocarAba('gabarito',this)">📄 Gabarito</button>
+  <button class="tab" onclick="trocarAba('aluno',this)">📷 Aluno</button>
+  <button class="tab" onclick="trocarAba('resultado',this)">📊 Resultado</button>
 </div>
 
-<div class="card">
-<h3>📷 Aluno</h3>
-<video id="video" autoplay playsinline></video>
-<button onclick="tirarFoto()">📸 Foto</button>
-<canvas id="canvas" style="display:none"></canvas>
-<img id="preview">
-<button onclick="enviarAluno()">Ler Aluno</button>
+<!-- ===== ABA GABARITO ===== -->
+<div id="pag-gabarito" class="pagina ativo">
+
+  <div class="card">
+    <h3>📄 Foto do Gabarito Mestre</h3>
+    <input type="file" id="foto_gab" accept="image/*">
+    <button onclick="lerGabarito()">🔍 Ler Gabarito</button>
+  </div>
+
+  <div class="card">
+    <h3>⚙️ Ajuste de Leitura</h3>
+    <div class="slider-grupo">
+      <label>Blur <span id="vBlurG">5</span></label>
+      <input type="range" id="blurG" min="1" max="11" step="2" value="5" oninput="document.getElementById('vBlurG').textContent=this.value">
+    </div>
+    <div class="slider-grupo">
+      <label>Thresh Block <span id="vTBG">15</span></label>
+      <input type="range" id="tbG" min="3" max="51" step="2" value="15" oninput="document.getElementById('vTBG').textContent=this.value">
+    </div>
+    <div class="slider-grupo">
+      <label>Thresh C <span id="vTCG">5</span></label>
+      <input type="range" id="tcG" min="1" max="20" value="5" oninput="document.getElementById('vTCG').textContent=this.value">
+    </div>
+    <div class="slider-grupo">
+      <label>Sensibilidade Preenchimento <span id="vFMG">0.20</span></label>
+      <input type="range" id="fmG" min="0.05" max="0.6" step="0.01" value="0.20" oninput="document.getElementById('vFMG').textContent=parseFloat(this.value).toFixed(2)">
+    </div>
+    <button class="cinza" onclick="lerGabarito()" id="btnReaplicarGab" disabled>🔄 Reaplicar com estes Parâmetros</button>
+  </div>
+
+  <div id="status-gab"></div>
+  <img id="debug-gab" class="debug-img hidden">
+
+  <div class="card hidden" id="card-gab-editor">
+    <h3>✏️ Revisão Manual do Gabarito</h3>
+    <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:10px">Confira e corrija as respostas detectadas:</p>
+    <div class="gab-grade" id="gab-grade"></div>
+    <button class="verde" onclick="salvarGabaritoManual()">💾 Salvar Gabarito</button>
+  </div>
+
 </div>
 
-<div class="card">
-<h3>⚙️ Calibração</h3>
-Blur <input type="range" id="blur" min="1" max="11" step="2" value="5"><br>
-Thresh Block <input type="range" id="thresh_block" min="3" max="35" step="2" value="15"><br>
-Thresh C <input type="range" id="thresh_C" min="1" max="15" value="5"><br>
-Fill <input type="range" id="fill_min" min="0.1" max="0.5" step="0.01" value="0.25">
+<!-- ===== ABA ALUNO ===== -->
+<div id="pag-aluno" class="pagina">
+
+  <div class="card">
+    <h3>📷 Câmera — Prova do Aluno</h3>
+    <div class="cam-container">
+      <video id="video" autoplay playsinline></video>
+      <div class="cam-overlay"></div>
+    </div>
+    <button onclick="tirarFoto()" id="btnFoto">📸 Tirar Foto</button>
+    <button class="cinza hidden" onclick="mostrarCamera()" id="btnRefazer">↩️ Refazer</button>
+    <canvas id="canvas" class="preview-img hidden"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>⚙️ Ajuste de Leitura</h3>
+    <div class="slider-grupo">
+      <label>Blur <span id="vBlurA">5</span></label>
+      <input type="range" id="blurA" min="1" max="11" step="2" value="5" oninput="document.getElementById('vBlurA').textContent=this.value">
+    </div>
+    <div class="slider-grupo">
+      <label>Thresh Block <span id="vTBA">15</span></label>
+      <input type="range" id="tbA" min="3" max="51" step="2" value="15" oninput="document.getElementById('vTBA').textContent=this.value">
+    </div>
+    <div class="slider-grupo">
+      <label>Thresh C <span id="vTCA">5</span></label>
+      <input type="range" id="tcA" min="1" max="20" value="5" oninput="document.getElementById('vTCA').textContent=this.value">
+    </div>
+    <div class="slider-grupo">
+      <label>Sensibilidade Preenchimento <span id="vFMA">0.20</span></label>
+      <input type="range" id="fmA" min="0.05" max="0.6" step="0.01" value="0.20" oninput="document.getElementById('vFMA').textContent=parseFloat(this.value).toFixed(2)">
+    </div>
+  </div>
+
+  <div id="status-aluno"></div>
+  <img id="debug-aluno" class="debug-img hidden">
+
+  <button class="verde" onclick="corrigirAluno()" id="btnCorrigir" disabled>✅ Corrigir Prova</button>
+
 </div>
 
-<div class="card">
-<pre id="saida"></pre>
-<img id="debug">
+<!-- ===== ABA RESULTADO ===== -->
+<div id="pag-resultado" class="pagina">
+  <div id="area-resultado">
+    <div style="text-align:center;color:#475569;padding:40px">
+      Corrija uma prova para ver o resultado aqui.
+    </div>
+  </div>
 </div>
 
 <script>
-const video=document.getElementById('video');
+// ===========================
+// ESTADO
+// ===========================
+let gabaritoAtual = null;
+let fotoAlunoBlobUrl = null;
+let stream = null;
+let ultimaFotoBytes = null;
 
-navigator.mediaDevices.getUserMedia({
-  video:{facingMode:"environment"}
-}).then(stream=>video.srcObject=stream);
-
-// FOTO
-function tirarFoto(){
-  const canvas=document.getElementById('canvas');
-  const ctx=canvas.getContext('2d');
-
-  canvas.width=video.videoWidth;
-  canvas.height=video.videoHeight;
-
-  ctx.drawImage(video,0,0);
-
-  document.getElementById('preview').src=canvas.toDataURL();
+// ===========================
+// ABAS
+// ===========================
+function trocarAba(nome, el) {
+  document.querySelectorAll('.pagina').forEach(p => p.classList.remove('ativo'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('ativo'));
+  document.getElementById('pag-' + nome).classList.add('ativo');
+  el.classList.add('ativo');
+  if (nome === 'aluno') iniciarCamera();
 }
 
-// ENVIO CENTRAL (CORRIGIDO)
-async function enviar(blob){
-  const fd=new FormData();
-
-  // 🔥 CORREÇÃO IMPORTANTE
-  fd.append("imagem", blob, "foto.jpg");
-
-  fd.append("blur",document.getElementById("blur").value);
-  fd.append("thresh_block",document.getElementById("thresh_block").value);
-  fd.append("thresh_C",document.getElementById("thresh_C").value);
-  fd.append("fill_min",document.getElementById("fill_min").value);
-
-  try{
-    const res=await fetch("/api/extrair-gabarito",{method:"POST",body:fd});
-    const data=await res.json();
-
-    if(data.erro){
-      alert(data.erro);
-      return;
-    }
-
-    document.getElementById("saida").textContent=
-      JSON.stringify(data.gabarito,null,2);
-
-    document.getElementById("debug").src=
-      "data:image/jpeg;base64,"+data.debug_img;
-
-  }catch(e){
-    alert("Erro de conexão");
-    console.error(e);
-  }
+// ===========================
+// CÂMERA
+// ===========================
+function iniciarCamera() {
+  if (stream) return;
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } } })
+    .then(s => {
+      stream = s;
+      document.getElementById('video').srcObject = s;
+    })
+    .catch(err => setStatus('status-aluno', 'Câmera não disponível: ' + err.message, 'erro'));
 }
 
+function tirarFoto() {
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  ctx.drawImage(video, 0, 0);
+  
+  video.style.display = 'none';
+  canvas.classList.remove('hidden');
+  document.getElementById('btnFoto').classList.add('hidden');
+  document.getElementById('btnRefazer').classList.remove('hidden');
+  document.getElementById('btnCorrigir').disabled = false;
+  
+  setStatus('status-aluno', 'Foto capturada! Ajuste os parâmetros se necessário e clique em Corrigir.', 'ok');
+}
+
+function mostrarCamera() {
+  document.getElementById('video').style.display = 'block';
+  document.getElementById('canvas').classList.add('hidden');
+  document.getElementById('btnFoto').classList.remove('hidden');
+  document.getElementById('btnRefazer').classList.add('hidden');
+  document.getElementById('btnCorrigir').disabled = true;
+  document.getElementById('debug-aluno').classList.add('hidden');
+}
+
+// ===========================
+// HELPERS
+// ===========================
+function setStatus(id, msg, tipo) {
+  const el = document.getElementById(id);
+  el.className = 'status-bar ' + tipo;
+  el.innerHTML = msg;
+}
+
+function getConfig(prefixo) {
+  return {
+    blur: document.getElementById('blur'+prefixo).value,
+    thresh_block: document.getElementById('tb'+prefixo).value,
+    thresh_C: document.getElementById('tc'+prefixo).value,
+    fill_min: document.getElementById('fm'+prefixo).value,
+  };
+}
+
+// ===========================
 // GABARITO
-function enviarGabarito(){
-  const f=document.getElementById("foto_mestre").files[0];
-  if(!f){alert("Selecione o gabarito");return;}
-  enviar(f);
-}
+// ===========================
+async function lerGabarito() {
+  const f = document.getElementById('foto_gab').files[0];
+  if (!f) { alert('Selecione uma imagem do gabarito'); return; }
 
-// ALUNO
-function enviarAluno(){
-  const canvas=document.getElementById("canvas");
-  if(!canvas.width){
-    alert("Tire a foto primeiro");
-    return;
+  setStatus('status-gab', '<span class="spinner"></span> Lendo gabarito...', 'aviso');
+  document.getElementById('card-gab-editor').classList.add('hidden');
+
+  const fd = new FormData();
+  fd.append('imagem', f, 'gabarito.jpg');
+  const cfg = getConfig('G');
+  Object.entries(cfg).forEach(([k,v]) => fd.append(k, v));
+
+  try {
+    const res = await fetch('/api/extrair-gabarito', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.erro) { setStatus('status-gab', '❌ ' + data.erro, 'erro'); return; }
+
+    gabaritoAtual = data.gabarito;
+    renderizarGabaritoEditor(data.gabarito);
+    document.getElementById('debug-gab').src = 'data:image/jpeg;base64,' + data.debug_img;
+    document.getElementById('debug-gab').classList.remove('hidden');
+    document.getElementById('card-gab-editor').classList.remove('hidden');
+    document.getElementById('btnReaplicarGab').disabled = false;
+    setStatus('status-gab', '✅ Gabarito lido! Revise abaixo e salve.', 'ok');
+  } catch(e) {
+    setStatus('status-gab', '❌ Erro de conexão', 'erro');
   }
-  canvas.toBlob(blob=>enviar(blob),"image/jpeg");
 }
-</script>
 
-</body>
-</html>
+function renderizarGabaritoEditor(gabarito) {
+  const grade = document.getElementById('gab-grade');
+  grade.innerHTML = '';
+  for (const [materia, resps] of Object.entries(gabarito)) {
+    const div = document.createElement('div');
+    div.className = 'gab-materia';
+    let html = `<h4>${materia}</h4><div class="gab-questoes">`;
+    resps.forEach((r, i) => {
+      html += `<div class="gab-q"><span>Q${i+1}</span>
+        <select id="gq_${materia}_${i}">
+          ${['A','B','C','D','E','?'].map(l => `<option ${l===r?'selected':''}>${l}</option>`).join('')}
+        </select></div>`;
+    });
+    html += '</div>';
+    div.innerHTML = html;
+    grade.appendChild(div);
+  }
+}
+
+async function salvarGabaritoManual() {
+  const gabarito = {};
+  for (const [materia, resps] of Object.entries(gabaritoAtual)) {
+    gabarito[materia] = resps.map((_, i) =>
+      document.getElementById(`gq_${materia}_${i}`).value
+    );
+  }
+
+  try {
+    const res = await fetch('/api/salvar-gabarito', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ gabarito })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      gabaritoAtual = gabarito;
+      setStatus('status-gab', '✅ Gabarito salvo com sucesso!', 'ok');
+    }
+  } catch(e) {
+    setStatus('status-gab', '❌ Erro ao salvar', 'erro');
+  }
+}
+
+// ===========================
+// CORREÇÃO ALUNO
+// ===========================
+async function corrigirAluno() {
+  const canvas = document.getElementById('canvas');
+  if (!canvas.width) { alert('Tire a foto primeiro'); return; }
+
+  setStatus('status-aluno', '<span class="spinner"></span> Processando prova...', 'aviso');
+  document.getElementById('btnCorrigir').disabled = true;
+
+  canvas.toBlob(async (blob) => {
+    const fd = new FormData();
+    fd.append('imagem', blob, 'aluno.jpg');
+    const cfg = getConfig('A');
+    Object.entries(cfg).forEach(([k,v]) => fd.append(k, v));
+
+    try {
+      const res = await fetch('/api/corrigir-aluno', { method: 'POST', body: fd });
+      const data = await res.json();
+
+      if (data.erro) {
+        setStatus('status-aluno', '❌ ' + data.erro, 'erro');
+        document.getElementById('btnCorrigir').disabled = false;
+        return;
+      }
+
+      document.getElementById('debug-aluno').src = 'data:image/jpeg;base64,' + data.debug_img;
+      document.getElementById('debug-aluno').classList.remove('hidden');
+
+      if (!data.tem_gabarito) {
+        setStatus('status-aluno', '⚠️ Sem gabarito carregado — mostrando só as respostas detectadas.', 'aviso');
+        renderizarSoRespostas(data.respostas);
+      } else {
+        setStatus('status-aluno', `✅ Corrigido! Acertos: ${data.acertos}/${data.total} — Nota: ${data.nota}`, 'ok');
+        renderizarResultado(data);
+      }
+
+      document.getElementById('btnCorrigir').disabled = false;
+
+      // Troca para aba resultado
+      document.querySelectorAll('.pagina').forEach(p => p.classList.remove('ativo'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('ativo'));
+      document.getElementById('pag-resultado').classList.add('ativo');
+      document.querySelectorAll('.tab')[2].classList.add('ativo');
+
+    } catch(e) {
+      setStatus('status-aluno', '❌ Erro de conexão', 'erro');
+      document.getElementById('btnCorri
